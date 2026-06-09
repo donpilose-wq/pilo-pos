@@ -1,4 +1,12 @@
 // El cerebro del Mostrador - Kiosco El Cholo
+function normalizarTexto(texto) {
+    if (!texto) return '';
+    return String(texto)
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+}
+
 let productosDB = [];
 let carrito = [];
 let totalVenta = 0;
@@ -253,13 +261,14 @@ if (inputCodigo) {
         clearTimeout(timeoutEscaneo);
 
         timeoutEscaneo = setTimeout(() => {
-            const valor = inputCodigo.value.trim().toUpperCase();
+            const valor = inputCodigo.value.trim();
             if (!valor) {
                 ocultarSugerencias();
                 return;
             }
 
-            const exacto = productosDB.find(p => p.id.toUpperCase() === valor);
+            const valorNorm = normalizarTexto(valor);
+            const exacto = productosDB.find(p => normalizarTexto(p.id) === valorNorm);
             if (exacto) {
                 procesarEscaneo(valor);
                 inputCodigo.value = '';
@@ -272,7 +281,7 @@ if (inputCodigo) {
 
     inputCodigo.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
-            const valor = inputCodigo.value.trim().toUpperCase();
+            const valor = inputCodigo.value.trim();
             if (valor !== "") {
                 procesarEscaneo(valor);
                 inputCodigo.value = '';
@@ -287,9 +296,10 @@ function procesarEscaneo(codigo) {
     const cantInput = document.getElementById('cantidad-agregar');
     const cantidadAAgregar = cantInput ? (parseInt(cantInput.value) || 1) : 1;
 
+    const codigoNorm = normalizarTexto(codigo);
     const producto = productosDB.find(p =>
-        p.id.toUpperCase() === codigo.toUpperCase() ||
-        p.nombre.toUpperCase() === codigo.toUpperCase()
+        normalizarTexto(p.id) === codigoNorm ||
+        normalizarTexto(p.nombre) === codigoNorm
     );
 
     if (producto) {
@@ -456,9 +466,10 @@ function mostrarSugerencias(busqueda) {
         return;
     }
 
+    const busquedaNorm = normalizarTexto(busqueda);
     const filtrados = productosDB.filter(p =>
-        p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-        p.id.toLowerCase().includes(busqueda.toLowerCase())
+        normalizarTexto(p.nombre).includes(busquedaNorm) ||
+        normalizarTexto(p.id).includes(busquedaNorm)
     ).slice(0, 5);
 
     if (filtrados.length === 0) {
