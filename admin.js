@@ -346,31 +346,12 @@ async function agregarFiado() {
 
 async function cobrarFiado(index) {
     const f = fiados[index];
-    const modo = prompt(`Cobrar vale de $${f.monto.toLocaleString('es-AR')} a "${f.cliente}":\n\n1: Cobrar con EFECTIVO\n2: Cobrar con TARJETA\n3: Cobrar con QR / MercadoPago\n\nIngrese el número correspondiente:`);
-
-    let met = modo === "1" ? "efectivo" : modo === "2" ? "debito" : modo === "3" ? "qr" : null;
-    if (met) {
-        // Cargar ventas actualizadas de la API
-        ventas = await apiGet('/api/ventas', 'ventas_realizadas');
-
-        ventas.push({
-            total: f.monto,
-            metodo: met,
-            fecha: new Date().toLocaleString(),
-            detalle: `COBRO VALE: ${f.cliente}`
-        });
-
+    if (confirm(`¿Confirmas borrar/liquidar el vale de $${f.monto.toLocaleString('es-AR')} de "${f.cliente}"?\n(No se sumará a la caja, solo se descontará de su sueldo)`)) {
         fiados.splice(index, 1);
-
-        // Guardar ambos en la API
-        await apiPost('/api/ventas', ventas, 'ventas_realizadas');
         await apiPost('/api/fiados', fiados, 'fiados');
-
         actualizarTodo();
         beepSuccess();
-        alert(`✅ Vale saldado. Registrado en caja de ${met.toUpperCase()}.`);
-    } else if (modo !== null) {
-        alert("❌ Opción inválida.");
+        alert(`✅ Vale de "${f.cliente}" eliminado correctamente.`);
     }
 }
 
@@ -497,8 +478,8 @@ function actualizarTodo() {
                     <td><strong>${f.cliente}</strong></td>
                     <td style="color: var(--danger); font-weight: bold;">$${f.monto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
                     <td>
-                        <button class="btn btn-success" style="padding: 6px 12px; font-size: 0.85rem;" onclick="cobrarFiado(${i})">
-                            💸 PAGÓ
+                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.85rem;" onclick="cobrarFiado(${i})">
+                            🗑️ BORRAR
                         </button>
                     </td>
                 </tr>`;
