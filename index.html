@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiosco El Cholo - POS Profesional</title>
+    <!-- Google Fonts: Outfit for titles, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #131a26;
+            --bg-tertiary: #1b2537;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #6366f1; /* Indigo */
+            --accent-hover: #4f46e5;
+            --success: #10b981; /* Emerald */
+            --success-hover: #059669;
+            --warning: #f59e0b; /* Amber */
+            --danger: #ef4444; /* Rose */
+            --danger-hover: #dc2626;
+            --border-color: #2e3c51;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Encabezado */
+        header { 
+            background: linear-gradient(135deg, var(--bg-secondary) 0%, #151e2e 100%); 
+            border-bottom: 1px solid var(--border-color);
+            padding: 12px 24px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+            z-index: 10;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-svg {
+            width: 48px;
+            height: 48px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 2px solid var(--accent-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-primary);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.25);
+        }
+
+        .header-text h1 { 
+            margin: 0; 
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.4rem; 
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: linear-gradient(to right, #ffffff, #c7d2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header-text p { 
+            margin: 2px 0 0 0; 
+            color: var(--text-secondary); 
+            font-size: 0.8rem; 
+            font-weight: 500;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .clock {
+            font-family: 'Outfit', monospace;
+            font-size: 1rem;
+            color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.08);
+            padding: 6px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            font-weight: 600;
+        }
+
+        #contenedor { 
+            display: flex; 
+            flex: 1; 
+            padding: 20px; 
+            gap: 20px; 
+            overflow: hidden; 
+        }
+        
+        /* Lado Izquierdo: Ventas y Búsqueda */
+        #ventas { 
+            flex: 2; 
+            background: var(--bg-secondary); 
+            padding: 24px; 
+            border-radius: 16px; 
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow); 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 5px;
+        }
+        
+        input#codigo { 
+            width: 100%; 
+            padding: 16px 16px 16px 48px; 
+            font-size: 1.25rem; 
+            font-family: 'Inter', sans-serif;
+            border: 2px solid var(--border-color); 
+            border-radius: 12px; 
+            box-sizing: border-box; 
+            background: var(--bg-primary); 
+            color: var(--text-primary);
+            outline: none; 
+            transition: var(--transition);
+        }
+
+        input#codigo:focus, input#cantidad-agregar:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        input#codigo:focus + .search-icon {
+            color: var(--accent-primary);
+        }
+        
+        /* Sugerencias de búsqueda manual */
+        .sugerencias-container {
+            background: var(--bg-tertiary);
+            border-radius: 0 0 12px 12px;
+            max-height: 220px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-top: none;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            display: none;
+        }
+
+        .sugerencias-container.active {
+            display: block;
+        }
+
+        .sugerencia-item {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            color: var(--text-primary);
+            transition: var(--transition);
+        }
+
+        .sugerencia-item:last-child {
+            border-bottom: none;
+        }
+
+        .sugerencia-item:hover { 
+            background: rgba(99, 102, 241, 0.1); 
+        }
+
+        .sugerencia-name {
+            font-weight: 500;
+        }
+
+        .sugerencia-price {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        #lista-productos {
+            flex: 1;
+            overflow-y: auto;
+            margin-top: 15px;
+            border-radius: 8px;
+        }
+
+        .producto-fila { 
+            display: flex; 
+            justify-content: space-between; 
+            border-bottom: 1px solid var(--border-color); 
+            padding: 16px 12px; 
+            align-items: center; 
+            font-size: 1.05rem; 
+            transition: var(--transition);
+        }
+
+        .producto-fila:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .prod-info {
+            flex: 2;
+        }
+
+        .prod-info strong {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .prod-info small {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 4px;
+            display: inline-block;
+        }
+
+        .prod-subtotal {
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-right: 20px;
+            font-size: 1.1rem;
+        }
+        
+        /* Lado Derecho: Totales */
+        #totales { 
+            flex: 1; 
+            background: var(--bg-secondary); 
+            padding: 28px; 
+            border-radius: 16px; 
+            border: 2px solid var(--accent-primary); 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4); 
+            overflow-y: auto; 
+        }
+        
+        .total-header {
+            text-align: center;
+        }
+
+        .total-header h2 {
+            margin: 0; 
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem; 
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        .total-nro { 
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.2rem; 
+            color: var(--success); 
+            font-weight: 800; 
+            text-align: center; 
+            margin: 12px 0; 
+            letter-spacing: -1px;
+            text-shadow: 0 0 20px rgba(16, 185, 129, 0.15);
+        }
+        
+        .payment-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        select { 
+            padding: 14px; 
+            font-size: 1rem; 
+            border-radius: 10px; 
+            border: 1px solid var(--border-color); 
+            width: 100%; 
+            background: var(--bg-primary); 
+            color: var(--text-primary);
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        select:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        .caja-vuelto { 
+            background: rgba(245, 158, 11, 0.05); 
+            padding: 16px; 
+            border-radius: 12px; 
+            border: 1px solid rgba(245, 158, 11, 0.2); 
+            margin-top: 4px;
+        }
+
+        .caja-vuelto input {
+            width: 100%; 
+            padding: 12px; 
+            margin-top: 8px; 
+            font-size: 1.1rem; 
+            border: 1px solid var(--border-color); 
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-weight: 600;
+            box-sizing: border-box;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .caja-vuelto input:focus {
+            border-color: var(--warning);
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+        }
+
+        .vuelto-text {
+            margin: 12px 0 0 0; 
+            font-size: 1.25rem; 
+            text-align: center;
+            font-weight: 600;
+        }
+
+        #vuelto-display {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+        }
+        
+        .btn {
+            font-family: 'Outfit', sans-serif;
+            border: none;
+            padding: 16px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            cursor: pointer;
+            border-radius: 10px;
+            width: 100%;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-finalizar { 
+            background: var(--success); 
+            color: #ffffff; 
+            margin-top: 10px; 
+        }
+        
+        .btn-finalizar:hover { 
+            background: var(--success-hover); 
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-fiado { 
+            background: var(--accent-primary); 
+            color: white; 
+        }
+
+        .btn-fiado:hover { 
+            background: var(--accent-hover); 
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-cancelar {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            font-size: 0.95rem;
+        }
+
+        .btn-cancelar:hover {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-eliminar { 
+            background: rgba(239, 68, 68, 0.15); 
+            color: var(--danger); 
+            border: 1px solid rgba(239, 68, 68, 0.2); 
+            padding: 8px 12px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: var(--transition);
+        }
+
+        .btn-eliminar:hover {
+            background: var(--danger);
+            color: white;
+        }
+        
+        .btn-link {
+            background: none; 
+            border: none; 
+            color: var(--text-secondary); 
+            text-decoration: underline; 
+            cursor: pointer; 
+            margin-top: 10px; 
+            font-size: 0.9rem; 
+            width: 100%; 
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .btn-link:hover {
+            color: var(--accent-primary);
+        }
+
+        /* Responsivo */
+        @media (max-width: 900px) {
+            #contenedor { flex-direction: column; overflow-y: auto; }
+            #ventas, #totales { flex: none; height: auto; }
+            body { overflow-y: auto; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-left">
+        <div class="logo-svg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                <path d="M3 6h18"/>
+                <path d="M16 10a4 4 0 0 1-8 0"/>
+            </svg>
+        </div>
+        <div class="header-text">
+            <h1>KIOSCO EL CHOLO</h1>
+            <p>Sistema de Gestión de Ventas & POS</p>
+        </div>
+    </div>
+    <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
+        <span id="estado-conexion" style="font-size: 0.85rem; font-weight: 700; padding: 6px 12px; border-radius: 8px; font-family: 'Outfit', sans-serif; transition: var(--transition);">Detectando...</span>
+        <div id="reloj" class="clock">00:00:00</div>
+    </div>
+</header>
+
+<div id="contenedor">
+    <!-- SECCIÓN IZQUIERDA: CARGA DE PRODUCTOS -->
+    <div id="ventas">
+        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <div style="display: flex; flex-direction: column; gap: 6px; width: 110px; flex-shrink: 0;" title="Cantidad de productos a agregar">
+                <input type="number" id="cantidad-agregar" min="1" value="1" style="padding: 16px; font-size: 1.25rem; font-family: 'Inter', sans-serif; border: 2px solid var(--border-color); border-radius: 12px; background: var(--bg-primary); color: var(--text-primary); text-align: center; font-weight: 700; outline: none; box-sizing: border-box; transition: var(--transition);" onfocus="this.select()">
+            </div>
+            <div class="search-container" style="flex: 1; margin-bottom: 0;">
+                <input type="text" id="codigo" placeholder="Escaneá código de barras o escribí nombre..." autofocus autocomplete="off">
+                <div class="search-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.3-4.3"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sugerencias de búsqueda manual -->
+        <div id="lista-sugerencias" class="sugerencias-container"></div>
+        
+        <div id="lista-productos">
+            <p style="color: var(--text-secondary); text-align: center; margin-top: 60px; font-style: italic; font-size: 1.1rem;">
+                Esperando lectura de código o entrada de producto...
+            </p>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DERECHA: COBRO Y TOTALES -->
+    <div id="totales">
+        <div class="total-header">
+            <h2>Total a Cobrar</h2>
+            <div class="total-nro" id="total-display">$0,00</div>
+        </div>
+        
+        <div class="payment-section">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label>Medio de Pago</label>
+                <select id="metodo-pago">
+                    <option value="efectivo">💵 Efectivo</option>
+                    <option value="debito">💳 Débito / Crédito</option>
+                    <option value="qr">📱 Mercado Pago / QR</option>
+                </select>
+            </div>
+
+            <div class="caja-vuelto">
+                <label>💰 Paga con</label>
+                <input type="number" id="paga-con" oninput="calcularVuelto()" placeholder="Ej: 5000">
+                <p class="vuelto-text">
+                    Vuelto: <span id="vuelto-display" style="color: var(--text-primary);">$0,00</span>
+                </p>
+            </div>
+
+            <button class="btn btn-finalizar" onclick="finalizarVenta()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 6 9 17l-5-5"/>
+                </svg>
+                FINALIZAR VENTA
+            </button>
+            
+            <button class="btn btn-fiado" onclick="enviarAFiado()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                </svg>
+                ANOTAR EN FIADOS
+            </button>
+
+            <button class="btn btn-cancelar" onclick="cancelarCarrito()">
+                🚫 Cancelar Carrito
+            </button>
+            
+            <button onclick="window.location.href='admin.html'" class="btn-link">
+                ⚙️ Ir a Panel de Administración
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+    // Reloj digital y detector de conexión en la cabecera
+    function actualizarReloj() {
+        const ahora = new Date();
+        const hrs = String(ahora.getHours()).padStart(2, '0');
+        const mins = String(ahora.getMinutes()).padStart(2, '0');
+        const segs = String(ahora.getSeconds()).padStart(2, '0');
+        document.getElementById('reloj').innerText = `${hrs}:${mins}:${segs}`;
+
+        const estadoCon = document.getElementById('estado-conexion');
+        if (estadoCon) {
+            if (navigator.onLine) {
+                estadoCon.innerText = "☁️ SINCRONIZADO";
+                estadoCon.style.background = "rgba(16, 185, 129, 0.12)";
+                estadoCon.style.color = "var(--success)";
+                estadoCon.style.border = "1px solid rgba(16, 185, 129, 0.2)";
+            } else {
+                estadoCon.innerText = "🔌 MODO OFFLINE";
+                estadoCon.style.background = "rgba(239, 68, 68, 0.12)";
+                estadoCon.style.color = "var(--danger)";
+                estadoCon.style.border = "1px solid rgba(239, 68, 68, 0.2)";
+            }
+        }
+    }
+    setInterval(actualizarReloj, 1000);
+    actualizarReloj();
+</script>
+</body>
+</html>
