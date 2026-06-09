@@ -1,4 +1,4 @@
-// El cerebro del Mostrador - Kiosco El Cholo
+// El cerebro del Mostrador - punto de venta
 let productosDB = [];
 let carrito = [];
 let totalVenta = 0;
@@ -68,7 +68,7 @@ function reproducirSonido(tipo) {
 
 // --- CONFIGURACIÓN DE SINCRONIZACIÓN DE GITHUB (Valores por defecto) ---
 const DEFAULT_USERNAME = "donpilose-wq";
-const DEFAULT_REPO = "pilo-pos";
+const DEFAULT_REPO = "menuclick";
 
 const RUTA_A_ARCHIVO = {
     '/api/inventario': 'productos.json',
