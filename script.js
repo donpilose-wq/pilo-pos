@@ -1,4 +1,4 @@
-// El cerebro del Mostrador - punto de venta
+// El cerebro del Mostrador - Kiosco El Cholo
 let productosDB = [];
 let carrito = [];
 let totalVenta = 0;
@@ -27,12 +27,12 @@ function reproducirSonido(tipo) {
             const osc1 = audioCtx.createOscillator();
             const osc2 = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-            
+
             osc1.type = 'triangle';
             osc1.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
             osc1.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.08); // E5
             osc1.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.16); // G5
-            
+
             osc2.type = 'sine';
             osc2.frequency.setValueAtTime(1046.50, audioCtx.currentTime + 0.16); // C6
 
@@ -42,7 +42,7 @@ function reproducirSonido(tipo) {
             osc1.connect(gain);
             osc2.connect(gain);
             gain.connect(audioCtx.destination);
-            
+
             osc1.start();
             osc2.start();
             osc1.stop(audioCtx.currentTime + 0.4);
@@ -68,7 +68,7 @@ function reproducirSonido(tipo) {
 
 // --- CONFIGURACIÓN DE SINCRONIZACIÓN DE GITHUB (Valores por defecto) ---
 const DEFAULT_USERNAME = "donpilose-wq";
-const DEFAULT_REPO = "menuclick";
+const DEFAULT_REPO = "pilo-pos";
 
 const RUTA_A_ARCHIVO = {
     '/api/inventario': 'productos.json',
@@ -77,15 +77,33 @@ const RUTA_A_ARCHIVO = {
     '/api/historial-cierres': 'historial_cierres.json'
 };
 
+async function fetchWithTimeout(resource, options = {}) {
+    const { timeout = 2500 } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(resource, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        throw error;
+    }
+}
+
 async function obtenerShaGitHub(filePath) {
+    if (!navigator.onLine) return null;
     const token = localStorage.getItem('github_token');
     const username = localStorage.getItem('github_username') || DEFAULT_USERNAME;
-    const repo = localStorage.getItem('github_repo') || DEFAULT_REPO;
+    const repo = (filePath === 'productos.json') ? 'menuclick' : (localStorage.getItem('github_repo') || DEFAULT_REPO);
     if (!token) return null;
-    
+
     try {
         const url = `https://api.github.com/repos/${username}/${repo}/contents/${filePath}`;
-        const response = await fetch(url, {
+        const response = await fetchWithTimeout(url, {
             headers: { Authorization: `token ${token}` }
         });
         if (response.ok) {
@@ -99,21 +117,22 @@ async function obtenerShaGitHub(filePath) {
 }
 
 async function leerDesdeGitHub(filePath) {
+    if (!navigator.onLine) return null;
     const token = localStorage.getItem('github_token');
     const username = localStorage.getItem('github_username') || DEFAULT_USERNAME;
-    const repo = localStorage.getItem('github_repo') || DEFAULT_REPO;
+    const repo = (filePath === 'productos.json') ? 'menuclick' : (localStorage.getItem('github_repo') || DEFAULT_REPO);
     if (!token) return null;
 
     try {
         const url = `https://api.github.com/repos/${username}/${repo}/contents/${filePath}`;
-        const response = await fetch(url, {
+        const response = await fetchWithTimeout(url, {
             headers: { Authorization: `token ${token}` }
         });
-        
+
         if (response.status === 404) {
             return []; // Retorna vacío si no existe el archivo
         }
-        
+
         if (response.ok) {
             const data = await response.json();
             const decodedContent = decodeURIComponent(escape(atob(data.content)));
@@ -126,9 +145,10 @@ async function leerDesdeGitHub(filePath) {
 }
 
 async function guardarEnGitHub(filePath, data, mensajeCommit) {
+    if (!navigator.onLine) return false;
     const token = localStorage.getItem('github_token');
     const username = localStorage.getItem('github_username') || DEFAULT_USERNAME;
-    const repo = localStorage.getItem('github_repo') || DEFAULT_REPO;
+    const repo = (filePath === 'productos.json') ? 'menuclick' : (localStorage.getItem('github_repo') || DEFAULT_REPO);
     if (!token) return false;
 
     try {
@@ -145,7 +165,7 @@ async function guardarEnGitHub(filePath, data, mensajeCommit) {
             body.sha = sha;
         }
 
-        const updateResponse = await fetch(url, {
+        const updateResponse = await fetchWithTimeout(url, {
             method: 'PUT',
             headers: {
                 Authorization: `token ${token}`,
@@ -163,10 +183,10 @@ async function guardarEnGitHub(filePath, data, mensajeCommit) {
 
 async function apiGet(ruta, fallbackKey) {
     const fileName = RUTA_A_ARCHIVO[ruta];
-    
-    // 1. Intentar con GitHub si hay token
+
+    // 1. Intentar con GitHub si hay internet y token
     const token = localStorage.getItem('github_token');
-    if (token && fileName) {
+    if (navigator.onLine && token && fileName) {
         console.log(`☁️ Intentando cargar ${fileName} desde GitHub...`);
         const dataGithub = await leerDesdeGitHub(fileName);
         if (dataGithub !== null) {
@@ -198,13 +218,13 @@ async function apiGet(ruta, fallbackKey) {
 
 async function apiPost(ruta, data, fallbackKey) {
     localStorage.setItem(fallbackKey, JSON.stringify(data));
-    
+
     const fileName = RUTA_A_ARCHIVO[ruta];
     let githubOk = false;
 
-    // Guardar en GitHub si hay token
+    // Guardar en GitHub si hay internet y token
     const token = localStorage.getItem('github_token');
-    if (token && fileName) {
+    if (navigator.onLine && token && fileName) {
         console.log(`☁️ Intentando subir ${fileName} a GitHub...`);
         githubOk = await guardarEnGitHub(fileName, data, `Actualización de ${fileName} - Mostrador`);
         if (githubOk) {
@@ -231,7 +251,7 @@ const inputCodigo = document.getElementById('codigo');
 if (inputCodigo) {
     inputCodigo.addEventListener('input', () => {
         clearTimeout(timeoutEscaneo);
-        
+
         timeoutEscaneo = setTimeout(() => {
             const valor = inputCodigo.value.trim().toUpperCase();
             if (!valor) {
@@ -273,13 +293,6 @@ function procesarEscaneo(codigo) {
     );
 
     if (producto) {
-        // Validar Stock
-        if (producto.tipo !== "variable" && (producto.stock === undefined || producto.stock <= 0)) {
-            reproducirSonido('alerta');
-            alert(`⚠️ ¡SIN STOCK! El producto "${producto.nombre}" no tiene unidades disponibles.`);
-            return;
-        }
-
         if (producto.tipo === "variable") {
             reproducirSonido('scanner');
             const precioManual = parseFloat(prompt(`Precio para ${producto.nombre}:`));
@@ -292,7 +305,7 @@ function procesarEscaneo(codigo) {
             reproducirSonido('scanner');
             agregarAlCarrito(producto.id, producto.nombre, producto.precio, cantidadAAgregar);
         }
-        
+
         // Reset a 1
         if (cantInput) cantInput.value = 1;
     } else {
@@ -306,21 +319,9 @@ function agregarAlCarrito(id, nombre, precio, cantidad = 1) {
     const existente = carrito.find(item => item.id === id);
 
     if (existente) {
-        const enDB = productosDB.find(p => p.id === id);
-        if (enDB && enDB.tipo !== "variable" && enDB.stock < (existente.cantidad + cantidad)) {
-            reproducirSonido('alerta');
-            alert(`⚠️ No hay suficiente stock para agregar ${cantidad} unidades de "${nombre}" (Stock disponible: ${enDB.stock}, En carrito: ${existente.cantidad}).`);
-            return;
-        }
         existente.cantidad += cantidad;
         existente.subtotal = existente.cantidad * existente.precio;
     } else {
-        const enDB = productosDB.find(p => p.id === id);
-        if (enDB && enDB.tipo !== "variable" && enDB.stock < cantidad) {
-            reproducirSonido('alerta');
-            alert(`⚠️ No hay suficiente stock para "${nombre}" (Stock disponible: ${enDB.stock}, Solicitado: ${cantidad}).`);
-            return;
-        }
         carrito.push({
             id: id,
             nombre: nombre,
@@ -341,20 +342,6 @@ function actualizarCantidad(index, nuevaCantidad) {
     }
 
     const item = carrito[index];
-    const enDB = productosDB.find(p => p.id === item.id);
-
-    if (enDB && enDB.tipo !== "variable") {
-        if (enDB.stock === undefined || enDB.stock < qty) {
-            reproducirSonido('alerta');
-            alert(`⚠️ Stock insuficiente para "${item.nombre}". Stock disponible: ${enDB.stock || 0}`);
-            const maxVal = Math.max(1, enDB.stock || 1);
-            item.cantidad = maxVal;
-            item.subtotal = item.cantidad * item.precio;
-            renderizarCarrito();
-            return;
-        }
-    }
-
     item.cantidad = qty;
     item.subtotal = item.cantidad * item.precio;
     renderizarCarrito();
@@ -469,7 +456,7 @@ function mostrarSugerencias(busqueda) {
         return;
     }
 
-    const filtrados = productosDB.filter(p => 
+    const filtrados = productosDB.filter(p =>
         p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
         p.id.toLowerCase().includes(busqueda.toLowerCase())
     ).slice(0, 5);
@@ -485,7 +472,7 @@ function mostrarSugerencias(busqueda) {
             <span class="sugerencia-price">$${p.precio.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
         </div>
     `).join('');
-    
+
     contenedor.classList.add('active');
 }
 
@@ -517,28 +504,6 @@ async function finalizarVenta() {
 
     const metodo = document.getElementById('metodo-pago').value;
 
-    // 1. VALIDAR STOCK DE TODOS LOS PRODUCTOS EN EL CARRITO
-    for (const itemVendido of carrito) {
-        const enDB = productosDB.find(p => p.id === itemVendido.id);
-        if (!enDB) continue;
-        if (enDB.tipo === "variable") continue;
-
-        if (enDB.stock === undefined || enDB.stock < itemVendido.cantidad) {
-            reproducirSonido('alerta');
-            alert(`⚠️ Stock insuficiente para "${enDB.nombre}". Disponible: ${enDB.stock || 0}, Solicitado: ${itemVendido.cantidad}`);
-            return;
-        }
-    }
-
-    // 2. DESCONTAR STOCK REAL
-    for (const itemVendido of carrito) {
-        const enDB = productosDB.find(p => p.id === itemVendido.id);
-        if (!enDB) continue;
-        if (enDB.tipo !== "variable") {
-            enDB.stock -= itemVendido.cantidad;
-        }
-    }
-
     // Obtener historial de ventas de la API
     let ventasHistoricas = await apiGet('/api/ventas', 'ventas_realizadas');
 
@@ -549,12 +514,11 @@ async function finalizarVenta() {
         productos: [...carrito]
     });
 
-    // Guardar ventas e inventario actualizado
+    // Guardar ventas
     const okVentas = await apiPost('/api/ventas', ventasHistoricas, 'ventas_realizadas');
-    const okInventario = await apiPost('/api/inventario', productosDB, 'inventario');
 
-    if (okVentas && okInventario) {
-        console.log("💾 Ventas e inventario actualizados correctamente.");
+    if (okVentas) {
+        console.log("💾 Ventas actualizadas correctamente.");
     } else {
         console.warn("⚠️ Error subiendo datos a GitHub. Guardado en memoria local.");
     }
@@ -565,7 +529,7 @@ async function finalizarVenta() {
     carrito = [];
     document.getElementById('paga-con').value = '';
     renderizarCarrito();
-    
+
     setTimeout(() => {
         if (inputCodigo) inputCodigo.focus();
     }, 50);
@@ -587,22 +551,12 @@ async function anularUltimaVenta() {
     }
 
     const ultima = ventas[ventas.length - 1];
-    
-    if (confirm(`¿Anular venta de $${ultima.total.toLocaleString('es-AR')} realizada el ${ultima.fecha}? Se devolverá el stock.`)) {
-        if (ultima.productos) {
-            ultima.productos.forEach(prod => {
-                const enDB = productosDB.find(p => p.id === prod.id);
-                if (enDB && enDB.tipo !== "variable") {
-                    enDB.stock += prod.cantidad;
-                }
-            });
-        }
 
-        ventas.pop(); 
+    if (confirm(`¿Anular venta de $${ultima.total.toLocaleString('es-AR')} realizada el ${ultima.fecha}?`)) {
+        ventas.pop();
 
         // Actualizar datos
         await apiPost('/api/ventas', ventas, 'ventas_realizadas');
-        await apiPost('/api/inventario', productosDB, 'inventario');
 
         reproducirSonido('exito');
         alert("Venta anulada correctamente.");
@@ -617,36 +571,25 @@ async function enviarAFiado() {
         alert("El carrito está vacío");
         return;
     }
-    const cliente = prompt("¿Nombre del cliente a quien se le fía?");
+    const cliente = prompt("¿Nombre del cliente para anotar el vale?");
     if (!cliente || cliente.trim() === "") return;
 
     fiados = await apiGet('/api/fiados', 'fiados');
 
     const idx = fiados.findIndex(f => f.cliente.toUpperCase() === cliente.toUpperCase().trim());
-    
+
     if (idx > -1) {
         fiados[idx].monto += totalVenta;
     } else {
         fiados.push({ cliente: cliente.trim(), monto: totalVenta });
     }
 
-    // Descontar stock
-    carrito.forEach(item => {
-        const enDB = productosDB.find(p => p.id === item.id);
-        if (enDB && enDB.tipo !== "variable") {
-            if (enDB.stock >= item.cantidad) {
-                enDB.stock -= item.cantidad;
-            }
-        }
-    });
-
-    // Guardar fiados e inventario
+    // Guardar fiados
     await apiPost('/api/fiados', fiados, 'fiados');
-    await apiPost('/api/inventario', productosDB, 'inventario');
 
     reproducirSonido('exito');
-    alert(`Anotado en fiados para: ${cliente}.\nMonto: $${totalVenta.toLocaleString('es-AR')}`);
-    
+    alert(`Vale anotado para: ${cliente}.\nMonto: $${totalVenta.toLocaleString('es-AR')}`);
+
     carrito = [];
     renderizarCarrito();
 }
@@ -662,7 +605,7 @@ function cancelarCarrito() {
 }
 
 // Foco automático continuo en el mostrador
-window.onclick = function(e) {
+window.onclick = function (e) {
     if (inputCodigo && !['BUTTON', 'INPUT', 'SELECT', 'OPTION'].includes(e.target.tagName) && !e.target.closest('.sugerencia-item') && !e.target.closest('.qty-input')) {
         inputCodigo.focus();
     }
