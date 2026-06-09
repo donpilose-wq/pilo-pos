@@ -1,0 +1,474 @@
+[
+    {
+        "nombre": "Ravioles",
+        "descripcion": "salsa a elección (boloñesa, crema, rosa, estofado, blanca)",
+        "precio": "16000",
+        "imagen": "img/IMG_1058.jpeg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0001"
+    },
+    {
+        "nombre": "Canelones",
+        "descripcion": "salsas(boloñesa,crema,rosa,estofado,blanca)",
+        "precio": "16000",
+        "imagen": "https://images.unsplash.com/photo-1601924638867-3ec1cf2b8b88",
+        "categoria": "Porción 🍽️",
+        "id": "prod0002"
+    },
+    {
+        "nombre": "Tallarines",
+        "descripcion": "Pasta casera con salsa a elección",
+        "precio": "16000",
+        "imagen": "img/IMG_1064.jpeg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0003"
+    },
+    {
+        "nombre": "Pastel de papas",
+        "descripcion": "Clásico pastel de carne con puré ",
+        "precio": "16000",
+        "imagen": "img/pastelpapa.png",
+        "categoria": "Porción 🍽️",
+        "id": "prod0004"
+    },
+    {
+        "nombre": "1/4 dePollo con guarnición",
+        "descripcion": "Pechuga de pollo a la plancha con acompañamiento a elección",
+        "precio": "16000",
+        "imagen": "img/ppolli.jpg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0005"
+    },
+    {
+        "nombre": "Asado con guarnición",
+        "descripcion": "Corte clásico a la parrilla con guarnición",
+        "precio": "18000",
+        "imagen": "img/asadocg.jpg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0006"
+    },
+    {
+        "nombre": "Vacío con guarnición",
+        "descripcion": "Vacío al horno o parrilla con guarnición",
+        "precio": "18000",
+        "imagen": "img/vaciocgu.jpg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0007"
+    },
+    {
+        "nombre": "Bondiola con guarnición",
+        "descripcion": "Bondiola tierna al horno con guarnición",
+        "precio": "18000",
+        "imagen": "img/bommdicguar.jpg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0008"
+    },
+    {
+        "nombre": "Matambre con guarnición",
+        "descripcion": "Matambre tierno con guarnición",
+        "precio": "18000",
+        "imagen": "img/mataguar.jpg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0009"
+    },
+    {
+        "nombre": "Milanesa con guarnición",
+        "descripcion": "De carne o pollo con acompañamiento a elección",
+        "precio": "16000",
+        "imagen": "img/milaconguarnicion.jpeg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0010"
+    },
+    {
+        "nombre": "Suprema con guarnición",
+        "descripcion": "Suprema de pollo con acompañamiento",
+        "precio": "16000",
+        "imagen": "img/supreg.png",
+        "categoria": "Porción 🍽️",
+        "id": "prod0011"
+    },
+    {
+        "nombre": "Milanesa napolitana con guarnición",
+        "descripcion": "Milanesa con salsa, jamón y queso",
+        "precio": "17000",
+        "imagen": "img/milanp.jpg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0012"
+    },
+    {
+        "nombre": "Suprema napolitana con guarnición",
+        "descripcion": "Suprema con salsa, jamón y queso",
+        "precio": "17000",
+        "imagen": "img/sunapo.jpg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0013"
+    },
+    {
+        "nombre": "Filet con guarnición",
+        "descripcion": "Filet de merluza con acompañamiento",
+        "precio": "16000",
+        "imagen": "img/fielmromana.jpg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0014"
+    },
+    {
+        "nombre": "Escalope con guarnición",
+        "descripcion": "Escalope de carne al horno con acompañamiento",
+        "precio": "16000",
+        "imagen": "img/escacguar.jpg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0015"
+    },
+    {
+        "nombre": "Tarta de jamón y queso",
+        "descripcion": "Porción de tarta casera",
+        "precio": "8500",
+        "imagen": "img/tarjyq.png",
+        "categoria": "Porción 🍽️",
+        "id": "prod0016"
+    },
+    {
+        "nombre": "Tarta de pollo",
+        "descripcion": "Porción de tarta de pollo casera",
+        "precio": "8500",
+        "imagen": "img/tartapolo.png",
+        "categoria": "Porción 🍽️",
+        "id": "prod0017"
+    },
+    {
+        "nombre": "Torta de acelga",
+        "descripcion": "Porción de tarta de acelga casera",
+        "precio": "8500",
+        "imagen": "img/taracelg.png",
+        "categoria": "Porción 🍽️",
+        "id": "prod0018"
+    },
+    {
+        "nombre": "Tarta de zapallito",
+        "descripcion": "Porción de tarta de zapallito casera",
+        "precio": "8500",
+        "imagen": "img/tarzapalli.jpg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0019"
+    },
+    {
+        "nombre": "Tortilla de papa",
+        "descripcion": "Tortilla clásica de papa",
+        "precio": "9000",
+        "imagen": "img/tortilladepapa.jpeg",
+        "categoria": "Porción 🍽️",
+        "id": "prod0020"
+    },
+    {
+        "nombre": "Tortilla de acelga",
+        "descripcion": "Tortilla verde de acelga",
+        "precio": "9000",
+        "imagen": "img/taracel.png",
+        "categoria": "Porción 🍽️",
+        "id": "prod0021"
+    },
+    {
+        "nombre": "Budín de pan",
+        "descripcion": "Postre casero",
+        "precio": "7000",
+        "imagen": "img/flanp.jpg",
+        "categoria": "Postres 🍮",
+        "id": "prod0022"
+    },
+    {
+        "nombre": "Flan",
+        "descripcion": "Flan casero con dulce o crema",
+        "precio": "7000",
+        "imagen": "img/flan.jpeg",
+        "categoria": "Postres 🍮",
+        "id": "prod0023"
+    },
+    {
+        "nombre": "Baston de muzzarella",
+        "descripcion": " baston frito",
+        "precio": "7000",
+        "imagen": "img/muzarele.jpg",
+        "categoria": "Por Unidad",
+        "id": "prod0024"
+    },
+    {
+        "nombre": "Papas al horno",
+        "descripcion": "Guarnición\nchica 7000, mediana 8000, grande 9000",
+        "precio": "8000",
+        "imagen": "img/ppapahorno.jpg",
+        "categoria": "Guarniciones 🥗",
+        "id": "prod0025"
+    },
+    {
+        "nombre": "Puré de papas",
+        "descripcion": "Guarnición clásica\nchica 7000, mediana 8000, grande 9000",
+        "precio": "8000",
+        "imagen": "img/puregar.png",
+        "categoria": "Guarniciones 🥗",
+        "id": "prod0026"
+    },
+    {
+        "nombre": "Puré de calabaza",
+        "descripcion": "Guarnición de calabaza\nchica 7000, mediana 8000, grande 9000",
+        "precio": "8000",
+        "imagen": "img/cala.jpg",
+        "categoria": "Guarniciones 🥗",
+        "id": "prod0027"
+    },
+    {
+        "nombre": "Ensalada Rusa",
+        "descripcion": "Ensalada Rusa\nchica 7000, mediana 8000, grande 9000",
+        "precio": "8000",
+        "imagen": "img/larusi.png",
+        "categoria": "Guarniciones 🥗",
+        "id": "prod0028"
+    },
+    {
+        "nombre": "Empanada ",
+        "descripcion": "de carne / pollo / jamón y queso",
+        "precio": "3000",
+        "imagen": "img/empa.png",
+        "categoria": "Por Unidad",
+        "id": "prod0029"
+    },
+    {
+        "nombre": "Lengua a la vinagreta",
+        "descripcion": "comida por kilo",
+        "precio": "42000",
+        "imagen": "img/lenguavinagreta.jpeg",
+        "categoria": "Por Kilo",
+        "id": "prod0030"
+    },
+    {
+        "nombre": "Morrones a la vinagreta",
+        "descripcion": "comida por kilo",
+        "precio": "34000",
+        "imagen": "img/morron.png",
+        "categoria": "Por Kilo",
+        "id": "prod0031"
+    },
+    {
+        "nombre": "Berenjenas a la vinagreta",
+        "descripcion": "comida por kilo",
+        "precio": "34000",
+        "imagen": "img/berenje.jpg",
+        "categoria": "Por Kilo",
+        "id": "prod0032"
+    },
+    {
+        "nombre": "Lunes",
+        "descripcion": "Pastel de papa/ Lentejas",
+        "precio": "16000",
+        "imagen": "img/lentejas.jpeg",
+        "categoria": "Plato del día 🍲",
+        "id": "prod0033"
+    },
+    {
+        "nombre": "Sándwich Vacio con fritas",
+        "descripcion": "Con lechuga, tomate, huevo, cebolla y mayonesa$16000 o solo 15000",
+        "precio": "16000",
+        "imagen": "img/vaioosan.jpg",
+        "categoria": "Sándwiches 🥪",
+        "id": "prod0034"
+    },
+    {
+        "nombre": "Bomba de Papa",
+        "descripcion": "papa y jyq",
+        "precio": "7000",
+        "imagen": "img/bombita.png",
+        "categoria": "Por Unidad",
+        "id": "prod0035"
+    },
+    {
+        "nombre": "Martes",
+        "descripcion": "Arroz con pollo",
+        "precio": "16000",
+        "imagen": "img/arrocpoolo.jpg",
+        "categoria": "Plato del día 🍲",
+        "id": "prod0036"
+    },
+    {
+        "nombre": "Miércoles",
+        "descripcion": "Albóndiga",
+        "precio": "16000",
+        "imagen": "img/albom.jpg",
+        "categoria": "Plato del día 🍲",
+        "id": "prod0037"
+    },
+    {
+        "nombre": "Jueves",
+        "descripcion": "ternerita guisada",
+        "precio": "16000",
+        "imagen": "img/terneritaguisada.jpg",
+        "categoria": "Plato del día 🍲",
+        "id": "prod0038"
+    },
+    {
+        "nombre": "Viernes",
+        "descripcion": "Pastas",
+        "precio": "16000",
+        "imagen": "img/IMG_1064.jpeg",
+        "categoria": "Plato del día 🍲",
+        "id": "prod0039"
+    },
+    {
+        "nombre": "Sándwich Milanesa con fritas",
+        "descripcion": "Con lechuga, tomate, huevo, cebolla y mayonesa 16000. Solo 15000",
+        "precio": "16000",
+        "imagen": "img/IMG_1098.jpeg",
+        "categoria": "Sándwiches 🥪",
+        "id": "prod0040"
+    },
+    {
+        "nombre": "Sándwich Matambre con fritas",
+        "descripcion": "Con lechuga, tomate, huevo, cebolla y mayonesa$16000 o solo 15000",
+        "precio": "16000",
+        "imagen": "img/sanmatamb.jpg",
+        "categoria": "Sándwiches 🥪",
+        "id": "prod0041"
+    },
+    {
+        "nombre": "Sandwich Bondiola con fritas",
+        "descripcion": "Con lechuga, tomate, huevo, cebolla y mayonesa$16000 o solo 15000",
+        "precio": "16000",
+        "imagen": "img/.jpg",
+        "categoria": "Sándwiches 🥪",
+        "id": "prod0042"
+    },
+    {
+        "nombre": "Sándwich Pollo con fritas",
+        "descripcion": "Con lechuga, tomate, huevo, cebolla y mayonesa$16000 o solo 15000",
+        "precio": "16000",
+        "imagen": "img/sandwpollo.jpg",
+        "categoria": "Sándwiches 🥪",
+        "id": "prod0043"
+    },
+    {
+        "nombre": "Asado por kilo",
+        "descripcion": "comida por kilo",
+        "precio": "52000",
+        "imagen": "img/Captura de pantalla 2025-10-29 165103.png",
+        "categoria": "Por Kilo",
+        "id": "prod0044"
+    },
+    {
+        "nombre": "Vacio por kilo",
+        "descripcion": "comida por kilo",
+        "precio": "52000",
+        "imagen": "img/vaciok.png",
+        "categoria": "Por Kilo",
+        "id": "prod0045"
+    },
+    {
+        "nombre": "Matambre por kilo",
+        "descripcion": "comida por kilo",
+        "precio": "52000",
+        "imagen": "img/IMG_1041.jpeg",
+        "categoria": "Por Kilo",
+        "id": "prod0046"
+    },
+    {
+        "nombre": "1/2 Pollo (solo)",
+        "descripcion": "comida por kilo",
+        "precio": "23000",
+        "imagen": "img/pollogran.jpg",
+        "categoria": "Por Kilo",
+        "id": "prod0047"
+    },
+    {
+        "nombre": "Pollo entero (solo)",
+        "descripcion": "comida por kilo",
+        "precio": "28000",
+        "imagen": "img/pollogran.jpg",
+        "categoria": "Por Kilo",
+        "id": "prod0048"
+    },
+    {
+        "nombre": "ESCALOPE",
+        "descripcion": "comida por kilo",
+        "precio": "46000",
+        "imagen": "img/escalope.jpeg",
+        "categoria": "Por Kilo",
+        "id": "prod0049"
+    },
+    {
+        "nombre": "FILET A LAROMANA ",
+        "descripcion": "comida por kilo",
+        "precio": "46000",
+        "imagen": "img/firomana.png",
+        "categoria": "Por Kilo",
+        "id": "prod0050"
+    },
+    {
+        "nombre": "Chori o Morci",
+        "descripcion": "por unidad",
+        "precio": "6000",
+        "imagen": "img/mosi.png",
+        "categoria": "Por Unidad",
+        "id": "prod0051"
+    },
+    {
+        "nombre": "Mila o Suprema ",
+        "descripcion": "por unidad",
+        "precio": "12000",
+        "imagen": "img/milaconguarnicion.jpeg",
+        "categoria": "Por Unidad",
+        "id": "prod0052"
+    },
+    {
+        "nombre": "Ensalada a elección ",
+        "descripcion": "Lechuga, tomate, remolacha, zanahoria, huevo, chaucha, pepino, arroz, cebolla\nchica 7000, mediana 8000, grande 9000",
+        "precio": "8000",
+        "imagen": "img/guarniciones.jpeg",
+        "categoria": "Guarniciones 🥗",
+        "id": "prod0053"
+    },
+    {
+        "nombre": "Torreja de Acelga",
+        "descripcion": "Torreja de Acelga",
+        "precio": "5000",
+        "imagen": "img/torre.jpg",
+        "categoria": "Por Unidad",
+        "id": "prod0054"
+    },
+    {
+        "nombre": "Pollo al Spiedo",
+        "descripcion": "Solo 25000\nCon guarnición 30000",
+        "precio": "26000",
+        "imagen": "img/espi.jpg",
+        "categoria": "Por Kilo",
+        "id": "prod0055"
+    },
+    {
+        "nombre": "Bondiola",
+        "descripcion": "Precio Por kilo",
+        "precio": "52000",
+        "imagen": "img/bondiola.jpeg",
+        "categoria": "Por Kilo",
+        "id": "prod0056"
+    },
+    {
+        "nombre": "Pollo entero con guarnición",
+        "descripcion": "Con guarnición a elección para 4 personas",
+        "precio": "32000",
+        "imagen": "img/pentero.jpg",
+        "categoria": "Por Kilo",
+        "id": "prod0057"
+    },
+    {
+        "nombre": "mila berenjena",
+        "descripcion": "por unidad ",
+        "precio": "2000",
+        "imagen": "img/milberen.jpg",
+        "categoria": "Por Unidad",
+        "id": "prod0058"
+    },
+    {
+        "nombre": "matambre enrollado ",
+        "descripcion": "matambre enrollado ",
+        "precio": "46000",
+        "imagen": "img/mataporuno.jpg",
+        "categoria": "Por Kilo",
+        "id": "prod0059"
+    }
+]
