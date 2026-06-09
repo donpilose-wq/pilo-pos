@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - punto de venta</title>
+    <title>Panel de Administración - Kiosco El Cholo</title>
     <!-- Google Fonts: Outfit for titles, Inter for body -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -485,7 +485,7 @@
 
     <!-- SECCIÓN INVENTARIO MOVIDA A OTRA PÁGINA (inventario.html) -->
 
-    <!-- 5. LIBRETA DE FIADOS -->
+    <!-- 5. LIBRETA DE VALES -->
     <div class="panel-card">
         <h3>
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -495,11 +495,11 @@
                 <line x1="16" y1="17" x2="8" y2="17"/>
                 <polyline points="10 9 9 9 8 9"/>
             </svg>
-            LIBRETA DE CLIENTES FIADOS
+            LIBRETA DE VALES DE CLIENTES
         </h3>
         <div class="form-row">
             <input type="text" id="fiado-cliente" placeholder="Nombre completo del cliente">
-            <input type="number" id="fiado-monto" placeholder="Monto $" style="max-width: 180px;">
+            <input type="number" id="fiado-monto" placeholder="Monto del vale $" style="max-width: 180px;">
             <button class="btn btn-success" onclick="agregarFiado()">➕</button>
         </div>
         <div class="contenedor-tabla">
@@ -507,7 +507,7 @@
                 <thead>
                     <tr>
                         <th>Cliente</th>
-                        <th>Saldo Pendiente</th>
+                        <th>Vales Acumulados</th>
                         <th style="width: 100px;">Acción</th>
                     </tr>
                 </thead>
@@ -548,7 +548,7 @@
         <div>
             <h4 style="color: var(--text-primary);">☁️ Sincronización con GitHub (Base de Datos en la Nube)</h4>
             <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 0.85rem;">
-                Configurá tu usuario, repositorio y Token de Acceso Personal (PAT) de GitHub. Al estar conectado, toda la información de ventas, productos, fiados y cierres se guardará automáticamente como archivos JSON en tu repositorio de GitHub, permitiéndote usar la aplicación en múltiples dispositivos en tiempo real.
+                Configurá tu usuario, repositorio y Token de Acceso Personal (PAT) de GitHub. Al estar conectado, toda la información de ventas, productos, vales y cierres se guardará automáticamente como archivos JSON en tu repositorio de GitHub, permitiéndote usar la aplicación en múltiples dispositivos en tiempo real.
             </p>
         </div>
         <div class="token-input-group" style="display: flex; flex-direction: column; gap: 14px; max-width: 550px; width: 100%;">
@@ -559,7 +559,7 @@
                 </div>
                 <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
                     <label style="font-size: 0.75rem;">Nombre del Repositorio</label>
-                    <input type="text" id="gh-repo" oninput="guardarConfiguracionGitHub()" placeholder="Ej: menuclick">
+                    <input type="text" id="gh-repo" oninput="guardarConfiguracionGitHub()" placeholder="Ej: pilo-pos">
                 </div>
             </div>
             <div style="display: flex; gap: 12px; align-items: flex-end; width: 100%;">
