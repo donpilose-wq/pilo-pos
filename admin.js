@@ -1,4 +1,4 @@
-// Panel de Administración -punto de venta
+// Panel de Administración - Kiosco El Cholo
 const PIN_ADMIN = "1234";
 
 // Control de acceso seguro
