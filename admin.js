@@ -1,5 +1,5 @@
 // Panel de Administración - Kiosco El Cholo
-const PIN_ADMIN = "1234";
+const PIN_ADMIN = "1";
 
 // Control de acceso seguro
 const acceso = prompt("Ingrese PIN de administrador para acceder a este panel:");
