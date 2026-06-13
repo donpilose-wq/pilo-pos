@@ -1,4 +1,4 @@
-// El cerebro del Mostrador -  El Cholo
+// El cerebro del Mostrador - Kiosco El Cholo
 function normalizarTexto(texto) {
     if (!texto) return '';
     return String(texto)
