@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario - Kiosco El Cholo</title>
+    <!-- Google Fonts: Outfit for titles, Inter for body -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Librería para el escáner QR/cámara -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0e17;
+            --bg-secondary: #131a26;
+            --bg-tertiary: #1b2537;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-primary: #6366f1; /* Indigo */
+            --accent-hover: #4f46e5;
+            --success: #10b981; /* Emerald */
+            --warning: #f59e0b; /* Amber */
+            --danger: #ef4444; /* Rose */
+            --danger-hover: #dc2626;
+            --border-color: #2e3c51;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 24px;
+            box-sizing: border-box;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Títulos */
+        h2, h3, h4 {
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        h3 {
+            color: var(--warning);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 8px;
+            margin-top: 15px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Botones navegación */
+        .navigation-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .btn-nav {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            padding: 12px 20px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-nav:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Secciones principales en tarjetas */
+        .panel-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+        }
+
+        /* Buscador */
+        .search-container {
+            position: relative;
+            margin-bottom: 16px;
+            width: 100%;
+        }
+
+        input#search-box {
+            width: 100%;
+            padding: 14px 16px 14px 48px;
+            font-size: 1.1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            outline: none;
+            box-sizing: border-box;
+            transition: var(--transition);
+        }
+
+        input#search-box:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        input#search-box:focus + .search-icon {
+            color: var(--accent-primary);
+        }
+
+        /* Tablas responsivas */
+        .contenedor-tabla {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-secondary);
+            font-size: 0.95rem;
+            text-align: left;
+        }
+
+        th {
+            background: var(--bg-tertiary);
+            color: var(--warning);
+            padding: 14px 16px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,0.015);
+        }
+
+        /* Formularios y controles */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-top: 16px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        input, select {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: var(--transition);
+            width: 100%;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Botones */
+        .btn {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-size: 0.95rem;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-hover);
+        }
+
+        .btn-edit {
+            background: var(--accent-primary);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .btn-edit:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-scanner {
+            background: var(--accent-primary);
+            color: white;
+            padding: 0 16px;
+        }
+
+        .btn-scanner:hover {
+            background: var(--accent-hover);
+        }
+
+        .status-low {
+            color: var(--danger);
+            font-weight: 700;
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        #reader {
+            width: 100%;
+            max-width: 420px;
+            margin: 16px auto;
+            border-radius: 12px;
+            overflow: hidden;
+            display: none;
+            border: 2px solid var(--accent-primary);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        }
+
+        /* Secciones colapsables */
+        .collapsible-form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px 0;
+        }
+
+        .collapsible-form-header:hover h3 {
+            color: var(--accent-primary);
+        }
+
+        .toggle-icon {
+            font-size: 1.25rem;
+            transition: var(--transition);
+        }
+
+        .collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-top: 10px;
+        }
+
+        .collapsed .collapsible-content {
+            max-height: 0;
+            margin-top: 0;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="collapsed" id="collapsible-card">
+<div class="container">
+    <div class="navigation-row">
+        <button class="btn-nav" onclick="window.location.href='admin.html'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="m12 19-7-7 7-7"/>
+                <path d="M19 12H5"/>
+            </svg>
+            VOLVER AL PANEL DE CAJA
+        </button>
+        <button class="btn-nav" onclick="window.location.href='index.html'">
+            🏪 IR AL MOSTRADOR
+        </button>
+    </div>
+
+    <!-- CARGAR / EDITAR PRODUCTO -->
+    <div class="panel-card" id="form-panel-card" style="display: none; margin-bottom: 20px;">
+        <h3 style="border-bottom: 2px solid var(--border-color); padding-bottom: 8px; margin-top: 0; display: flex; align-items: center; gap: 8px;">
+            ✏️ <span id="form-title">EDITAR PRODUCTO</span>
+        </h3>
+        
+        <div style="margin-top: 16px;">
+            <div class="form-row">
+                <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
+                    <label>Código de Barras</label>
+                    <input type="text" id="admin-codigo" readonly style="opacity: 0.7; cursor: not-allowed;">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label>Nombre del Producto</label>
+                    <input type="text" id="admin-nombre" placeholder="Nombre descriptivo">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label>Precio $</label>
+                    <input type="number" id="admin-precio" placeholder="Precio de venta">
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label>Tipo de Venta</label>
+                    <select id="admin-tipo">
+                        <option value="fijo">Precio Fijo (Unitario)</option>
+                        <option value="variable">Precio Variable (Peso / Fiambrería)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 16px;">
+                <button id="btn-guardar" class="btn btn-success" style="flex: 2; font-size: 1.1rem;" onclick="guardarProducto()">
+                    💾 GUARDAR CAMBIOS
+                </button>
+                <button id="btn-cancelar-edit" class="btn" style="flex: 1; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color);" onclick="cancelarEdicion()">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LISTA DE INVENTARIO -->
+    <div class="panel-card">
+        <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
+                <path d="M12 6v6l4 2"/>
+            </svg>
+            INVENTARIO TOTAL
+        </h3>
+
+        <!-- BUSCADOR DE PRODUCTOS -->
+        <div class="search-container" style="margin-top: 20px;">
+            <input type="text" id="search-box" placeholder="Buscar productos por nombre, código de barras o letras..." autocomplete="off" oninput="filtrarProductos()">
+            <div class="search-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.3-4.3"/>
+                </svg>
+            </div>
+        </div>
+
+        <div class="contenedor-tabla">
+            <table id="tabla-productos">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Producto</th>
+                        <th>Precio</th>
+                        <th style="width: 160px; text-align: center;">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-secondary); font-style: italic;">Cargando inventario...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="inventario.js"></script>
+</body>
+</html>
