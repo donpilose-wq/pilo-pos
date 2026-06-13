@@ -12,7 +12,6 @@ let carrito = [];
 let totalVenta = 0;
 let ultimoEscaneo = "";
 let timeoutEscaneo = null;
-let fiados = [];
 
 // --- SISTEMA DE AUDIO (Efectos de sonido táctiles) ---
 function reproducirSonido(tipo) {
@@ -81,7 +80,6 @@ const DEFAULT_REPO = "pilo-pos";
 const RUTA_A_ARCHIVO = {
     '/api/inventario': 'productos.json',
     '/api/ventas': 'ventas.json',
-    '/api/fiados': 'fiados.json',
     '/api/historial-cierres': 'historial_cierres.json'
 };
 
@@ -250,9 +248,7 @@ async function cargarInventario() {
     productosDB = await apiGet('/api/inventario', 'inventario');
 }
 
-async function cargarFiados() {
-    fiados = await apiGet('/api/fiados', 'fiados');
-}
+
 
 // 2. ESCUCHA DE LA PISTOLITA Y BÚSQUEDA MANUAL
 const inputCodigo = document.getElementById('codigo');
@@ -575,35 +571,7 @@ async function anularUltimaVenta() {
     }
 }
 
-// 8. FIADOS Y EXTRAS (CON API/GITHUB)
-async function enviarAFiado() {
-    if (carrito.length === 0) {
-        reproducirSonido('alerta');
-        alert("El carrito está vacío");
-        return;
-    }
-    const cliente = prompt("¿Nombre del cliente para anotar el vale?");
-    if (!cliente || cliente.trim() === "") return;
 
-    fiados = await apiGet('/api/fiados', 'fiados');
-
-    const idx = fiados.findIndex(f => f.cliente.toUpperCase() === cliente.toUpperCase().trim());
-
-    if (idx > -1) {
-        fiados[idx].monto += totalVenta;
-    } else {
-        fiados.push({ cliente: cliente.trim(), monto: totalVenta });
-    }
-
-    // Guardar fiados
-    await apiPost('/api/fiados', fiados, 'fiados');
-
-    reproducirSonido('exito');
-    alert(`Vale anotado para: ${cliente}.\nMonto: $${totalVenta.toLocaleString('es-AR')}`);
-
-    carrito = [];
-    renderizarCarrito();
-}
 
 function cancelarCarrito() {
     if (carrito.length > 0) {
@@ -625,7 +593,6 @@ window.onclick = function (e) {
 // Cargar la base de datos al inicio
 async function inicializarMostrador() {
     await cargarInventario();
-    await cargarFiados();
     renderizarCarrito();
 }
 
