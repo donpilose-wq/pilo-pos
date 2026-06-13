@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - Kiosco El Cholo</title>
+    <title>Panel de Administración - El Cholo</title>
     <!-- Google Fonts: Outfit for titles, Inter for body -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -459,8 +459,12 @@
             </svg>
             REGISTRAR SALIDA DE DINERO (GASTO / PROVEEDOR)
         </h3>
-        <div class="form-row">
-            <input type="text" id="gasto-detalle" placeholder="Detalle del gasto (Ej: Panadería, Coca-cola, Gas)">
+        <div class="form-row" style="flex-wrap: wrap;">
+            <select id="gasto-tipo" onchange="toggleTipoGasto()" style="max-width: 250px; flex-shrink: 0;">
+                <option value="general">💸 Gasto General / Servicio / Proveedor</option>
+                <option value="adelanto">👤 Adelanto de Sueldo (Empleado)</option>
+            </select>
+            <input type="text" id="gasto-detalle" placeholder="Detalle del gasto (Ej: Panadería, Coca-cola, Gas, Luz)">
             <input type="number" id="gasto-monto" placeholder="Monto $" style="max-width: 180px;">
             <button class="btn btn-danger" onclick="registrarGasto()" style="font-size: 1.3rem; padding: 0 24px;">−</button>
         </div>
@@ -485,36 +489,7 @@
 
     <!-- SECCIÓN INVENTARIO MOVIDA A OTRA PÁGINA (inventario.html) -->
 
-    <!-- 5. LIBRETA DE VALES -->
-    <div class="panel-card">
-        <h3>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-                <polyline points="10 9 9 9 8 9"/>
-            </svg>
-            LIBRETA DE VALES DE CLIENTES
-        </h3>
-        <div class="form-row">
-            <input type="text" id="fiado-cliente" placeholder="Nombre completo del cliente">
-            <input type="number" id="fiado-monto" placeholder="Monto del vale $" style="max-width: 180px;">
-            <button class="btn btn-success" onclick="agregarFiado()">➕</button>
-        </div>
-        <div class="contenedor-tabla">
-            <table id="tabla-fiados">
-                <thead>
-                    <tr>
-                        <th>Cliente</th>
-                        <th>Vales Acumulados</th>
-                        <th style="width: 100px;">Acción</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-    </div>
+
 
     <!-- 6. HISTORIAL DE CIERRES -->
     <div class="panel-card">
