@@ -15,12 +15,10 @@ const DEFAULT_REPO = "pilo-pos";
 const RUTA_A_ARCHIVO = {
     '/api/inventario': 'productos.json',
     '/api/ventas': 'ventas.json',
-    '/api/fiados': 'fiados.json',
     '/api/historial-cierres': 'historial_cierres.json'
 };
 
 let inventario = [];
-let fiados = [];
 let ventas = [];
 let historialCierres = [];
 
@@ -243,23 +241,32 @@ async function apiPost(ruta, data, fallbackKey) {
 
 // --- GESTIÓN DE GASTOS / EGRESOS ---
 async function registrarGasto() {
+    const tipo = document.getElementById('gasto-tipo').value;
     const det = document.getElementById('gasto-detalle').value.trim();
     const mon = parseFloat(document.getElementById('gasto-monto').value);
 
     if (!det || isNaN(mon) || mon <= 0) {
-        alert("⚠️ Por favor, complete el detalle y el monto del pago correctamente.");
+        const errorMsg = tipo === 'adelanto' 
+            ? "⚠️ Por favor, complete el nombre del empleado y el monto del adelanto."
+            : "⚠️ Por favor, complete el detalle y el monto del pago correctamente.";
+        alert(errorMsg);
         return;
     }
 
-    if (confirm(`¿Confirmas el registro del pago de $${mon.toLocaleString('es-AR')} por: "${det}"?`)) {
+    const confirmMsg = tipo === 'adelanto'
+        ? `¿Confirmas registrar el adelanto de sueldo de $${mon.toLocaleString('es-AR')} para: "${det}"?\n(Se descontará de la caja diaria)`
+        : `¿Confirmas el registro del pago de $${mon.toLocaleString('es-AR')} por: "${det}"?`;
+
+    if (confirm(confirmMsg)) {
         // Cargar ventas actuales
         ventas = await apiGet('/api/ventas', 'ventas_realizadas');
 
+        const prefijo = tipo === 'adelanto' ? 'ADELANTO SUELDO' : 'GASTO';
         const nuevoGasto = {
             total: -mon, // Monto negativo representa salida de caja
             metodo: 'efectivo',
             fecha: new Date().toLocaleString(),
-            detalle: `GASTO: ${det}`
+            detalle: `${prefijo}: ${det}`
         };
 
         ventas.push(nuevoGasto);
@@ -272,6 +279,17 @@ async function registrarGasto() {
 
         actualizarTodo();
         beepSuccess();
+    }
+}
+
+function toggleTipoGasto() {
+    const tipo = document.getElementById('gasto-tipo').value;
+    const detInput = document.getElementById('gasto-detalle');
+    if (!detInput) return;
+    if (tipo === 'adelanto') {
+        detInput.placeholder = "Nombre del empleado (Ej: Juan Pérez)";
+    } else {
+        detInput.placeholder = "Detalle del gasto (Ej: Panadería, Coca-cola, Gas, Luz)";
     }
 }
 
@@ -318,43 +336,6 @@ async function limpiarSoloGastos() {
     }
 }
 
-// Las funciones de gestión de productos y cámara se movieron a inventario.js
-
-// --- LIBRETA DE FIADOS ---
-async function agregarFiado() {
-    const cli = document.getElementById('fiado-cliente').value.trim();
-    const mon = parseFloat(document.getElementById('fiado-monto').value);
-
-    if (!cli || isNaN(mon) || mon <= 0) {
-        alert("⚠️ Ingrese un nombre de cliente y un monto válido para el vale.");
-        return;
-    }
-
-    const idx = fiados.findIndex(f => f.cliente.toUpperCase() === cli.toUpperCase());
-    if (idx > -1) {
-        fiados[idx].monto += mon;
-    } else {
-        fiados.push({ cliente: cli, monto: mon });
-    }
-
-    await apiPost('/api/fiados', fiados, 'fiados');
-    document.getElementById('fiado-cliente').value = '';
-    document.getElementById('fiado-monto').value = '';
-    actualizarTodo();
-    beepSuccess();
-}
-
-async function cobrarFiado(index) {
-    const f = fiados[index];
-    if (confirm(`¿Confirmas borrar/liquidar el vale de $${f.monto.toLocaleString('es-AR')} de "${f.cliente}"?\n(No se sumará a la caja, solo se descontará de su sueldo)`)) {
-        fiados.splice(index, 1);
-        await apiPost('/api/fiados', fiados, 'fiados');
-        actualizarTodo();
-        beepSuccess();
-        alert(`✅ Vale de "${f.cliente}" eliminado correctamente.`);
-    }
-}
-
 // --- CIERRE DE CAJA ---
 async function borrarVentas() {
     if (ventas.length === 0) return alert("No hay movimientos de caja cargados en el turno de hoy.");
@@ -371,9 +352,8 @@ async function borrarVentas() {
 
     const general = e + t + q;
     const totalGastos = gastosSolo.reduce((acc, g) => acc + Math.abs(g.total), 0);
-    const totalFiados = fiados.reduce((acc, f) => acc + f.monto, 0);
 
-    if (confirm(`¿CERRAR CAJA DE HOY?\n\n📊 Resumen Financiero:\n--------------------------\n💵 Efectivo Neto: $${e.toLocaleString('es-AR')}\n💳 Tarjetas/Débito: $${t.toLocaleString('es-AR')}\n📱 QR/MercadoPago: $${q.toLocaleString('es-AR')}\n➖ Gastos/Pagos: $${totalGastos.toLocaleString('es-AR')}\n--------------------------\n💰 TOTAL GENERAL: $${general.toLocaleString('es-AR')}\n🧾 Ventas realizadas: ${ventasSolo.length}\n📝 Vales pendientes: ${fiados.length} clientes ($${totalFiados.toLocaleString('es-AR')})\n\nSe guardará el detalle completo en historial_cierres.json`)) {
+    if (confirm(`¿CERRAR CAJA DE HOY?\n\n📊 Resumen Financiero:\n--------------------------\n💵 Efectivo Neto: $${e.toLocaleString('es-AR')}\n💳 Tarjetas/Débito: $${t.toLocaleString('es-AR')}\n📱 QR/MercadoPago: $${q.toLocaleString('es-AR')}\n➖ Gastos/Pagos: $${totalGastos.toLocaleString('es-AR')}\n--------------------------\n💰 TOTAL GENERAL: $${general.toLocaleString('es-AR')}\n🧾 Ventas realizadas: ${ventasSolo.length}\n\nSe guardará el detalle completo en historial_cierres.json`)) {
 
         // Cargar historial actual de la API
         historialCierres = await apiGet('/api/historial-cierres', 'historial_cierres');
@@ -395,14 +375,7 @@ async function borrarVentas() {
                 metodo: v.metodo || 'efectivo',
                 detalle: v.detalle || 'Venta',
                 productos: v.productos || []
-            })),
-
-            // Snapshot de fiados activos al momento del cierre
-            fiados_al_cierre: fiados.map(f => ({
-                cliente: f.cliente,
-                deuda: f.monto
-            })),
-            total_fiados_pendientes: totalFiados
+            }))
         };
 
         historialCierres.push(cierreCompleto);
@@ -410,16 +383,15 @@ async function borrarVentas() {
         // Limpiar ventas del dia
         ventas = [];
 
-        // Guardar historial completo (con detalle) + ventas vacias + fiados en disco (JSON)
+        // Guardar historial completo (con detalle) + ventas vacias en disco (JSON)
         const okHistorial = await apiPost('/api/historial-cierres', historialCierres, 'historial_cierres');
         const okVentas = await apiPost('/api/ventas', ventas, 'ventas_realizadas');
-        await apiPost('/api/fiados', fiados, 'fiados');
 
         actualizarTodo();
         beepSuccess();
 
         if (okHistorial && okVentas) {
-            alert(`✅ Caja cerrada y guardada correctamente en historial_cierres.json\n\n📁 Se guardaron:\n• ${cierreCompleto.cantidad_ventas} ventas del dia\n• ${gastosSolo.length} egresos/gastos\n• ${fiados.length} vales pendientes al cierre\n\n💰 Total del dia: $${general.toLocaleString('es-AR')}`);
+            alert(`✅ Caja cerrada y guardada correctamente en historial_cierres.json\n\n📁 Se guardaron:\n• ${cierreCompleto.cantidad_ventas} ventas del dia\n• ${gastosSolo.length} egresos/gastos\n\n💰 Total del dia: $${general.toLocaleString('es-AR')}`);
         } else {
             alert(`⚠️ Cierre guardado en memoria del navegador.\nAsegurate de que el servidor server.py este corriendo para guardar en los archivos JSON.`);
         }
@@ -464,27 +436,7 @@ function actualizarTodo() {
 
 
 
-    // 3. Tabla de Fiados
-    const tbodyFiado = document.querySelector('#tabla-fiados tbody');
-    if (tbodyFiado) {
-        tbodyFiado.innerHTML = '';
 
-        // Ordenar fiados por nombre
-        fiados.sort((a, b) => a.cliente.localeCompare(b.cliente));
-
-        fiados.forEach((f, i) => {
-            tbodyFiado.innerHTML += `
-                <tr>
-                    <td><strong>${f.cliente}</strong></td>
-                    <td style="color: var(--danger); font-weight: bold;">$${f.monto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-                    <td>
-                        <button class="btn btn-danger" style="padding: 6px 12px; font-size: 0.85rem;" onclick="cobrarFiado(${i})">
-                            🗑️ BORRAR
-                        </button>
-                    </td>
-                </tr>`;
-        });
-    }
 
     // 4. Tabla Historial de Cierres
     const tbodyHist = document.getElementById('cuerpo-historial');
@@ -528,7 +480,6 @@ function beepSuccess() {
 async function inicializarAdmin() {
     // Cargar todos los datos desde el servidor API
     inventario = await apiGet('/api/inventario', 'inventario');
-    fiados = await apiGet('/api/fiados', 'fiados');
     ventas = await apiGet('/api/ventas', 'ventas_realizadas');
     historialCierres = await apiGet('/api/historial-cierres', 'historial_cierres');
 
