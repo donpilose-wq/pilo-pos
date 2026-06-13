@@ -1,452 +1,333 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inventario -  El Cholo</title>
-    <!-- Google Fonts: Outfit for titles, Inter for body -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Librería para el escáner QR/cámara -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-        :root {
-            --bg-primary: #0a0e17;
-            --bg-secondary: #131a26;
-            --bg-tertiary: #1b2537;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-primary: #6366f1; /* Indigo */
-            --accent-hover: #4f46e5;
-            --success: #10b981; /* Emerald */
-            --warning: #f59e0b; /* Amber */
-            --danger: #ef4444; /* Rose */
-            --danger-hover: #dc2626;
-            --border-color: #2e3c51;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+// Gestión de Inventario - Kiosco El Cholo
+const DEFAULT_USERNAME = "donpilose-wq"; 
+const DEFAULT_REPO = "menuclick";
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 24px;
-            box-sizing: border-box;
-            min-height: 100vh;
-        }
+const RUTA_A_ARCHIVO = {
+    '/api/inventario': 'productos.json'
+};
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
+let inventario = [];
+let editandoCodigo = null; // Guardar código del producto que se está editando
 
-        /* Títulos */
-        h2, h3, h4 {
-            font-family: 'Outfit', sans-serif;
-            margin: 0;
-            font-weight: 700;
-        }
+function normalizarTexto(texto) {
+    if (!texto) return '';
+    return String(texto)
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+}
 
-        h3 {
-            color: var(--warning);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 8px;
-            margin-top: 15px;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+// --- UTILERÍAS DE NAVEGACIÓN ---
+function expandirFormulario() {
+    const card = document.getElementById('form-panel-card');
+    if (card) {
+        card.style.display = 'block';
+    }
+}
 
-        /* Botones navegación */
-        .navigation-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
+function colapsarFormulario() {
+    const card = document.getElementById('form-panel-card');
+    if (card) {
+        card.style.display = 'none';
+    }
+}
 
-        .btn-nav {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            padding: 12px 20px;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            font-size: 0.95rem;
-            border-radius: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition);
-        }
+// --- APIS DE PERSISTENCIA HYBRID (GitHub / LocalStorage) ---
+async function fetchWithTimeout(resource, options = {}) {
+    const { timeout = 2500 } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(resource, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        throw error;
+    }
+}
 
-        .btn-nav:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--accent-primary);
-            color: var(--accent-primary);
+async function obtenerShaGitHub(filePath) {
+    if (!navigator.onLine) return null;
+    const token = localStorage.getItem('github_token');
+    const username = localStorage.getItem('github_username') || DEFAULT_USERNAME;
+    const repo = localStorage.getItem('github_repo') || DEFAULT_REPO;
+    if (!token) return null;
+    
+    try {
+        const url = `https://api.github.com/repos/${username}/${repo}/contents/${filePath}`;
+        const response = await fetchWithTimeout(url, {
+            headers: { Authorization: `token ${token}` }
+        });
+        if (response.ok) {
+            const data = await response.json();
+            return data.sha;
         }
+    } catch (e) {
+        console.warn(`No se pudo obtener SHA para ${filePath}:`, e);
+    }
+    return null;
+}
 
-        /* Secciones principales en tarjetas */
-        .panel-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: var(--card-shadow);
-        }
+async function leerDesdeGitHub(filePath) {
+    if (!navigator.onLine) return null;
+    const token = localStorage.getItem('github_token');
+    const username = localStorage.getItem('github_username') || DEFAULT_USERNAME;
+    const repo = localStorage.getItem('github_repo') || DEFAULT_REPO;
+    if (!token) return null;
 
-        /* Buscador */
-        .search-container {
-            position: relative;
-            margin-bottom: 16px;
-            width: 100%;
-        }
-
-        input#search-box {
-            width: 100%;
-            padding: 14px 16px 14px 48px;
-            font-size: 1.1rem;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            outline: none;
-            box-sizing: border-box;
-            transition: var(--transition);
-        }
-
-        input#search-box:focus {
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-secondary);
-            pointer-events: none;
-            transition: var(--transition);
-        }
-
-        input#search-box:focus + .search-icon {
-            color: var(--accent-primary);
-        }
-
-        /* Tablas responsivas */
-        .contenedor-tabla {
-            width: 100%;
-            overflow-x: auto;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            margin-top: 10px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--bg-secondary);
-            font-size: 0.95rem;
-            text-align: left;
-        }
-
-        th {
-            background: var(--bg-tertiary);
-            color: var(--warning);
-            padding: 14px 16px;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-primary);
-            vertical-align: middle;
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        tr:hover td {
-            background: rgba(255,255,255,0.015);
-        }
-
-        /* Formularios y controles */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 14px;
-            margin-top: 16px;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        input, select {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            box-sizing: border-box;
-            outline: none;
-            transition: var(--transition);
-            width: 100%;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-
-        label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        /* Botones */
-        .btn {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            padding: 12px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-size: 0.95rem;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #059669;
-            box-shadow: 0 0 12px rgba(16, 185, 129, 0.2);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-        }
-
-        .btn-danger:hover {
-            background: var(--danger-hover);
-        }
-
-        .btn-edit {
-            background: var(--accent-primary);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-        }
-
-        .btn-edit:hover {
-            background: var(--accent-hover);
-        }
-
-        .btn-scanner {
-            background: var(--accent-primary);
-            color: white;
-            padding: 0 16px;
-        }
-
-        .btn-scanner:hover {
-            background: var(--accent-hover);
-        }
-
-        .status-low {
-            color: var(--danger);
-            font-weight: 700;
-            animation: pulse-red 2s infinite;
-        }
-
-        @keyframes pulse-red {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
-
-        #reader {
-            width: 100%;
-            max-width: 420px;
-            margin: 16px auto;
-            border-radius: 12px;
-            overflow: hidden;
-            display: none;
-            border: 2px solid var(--accent-primary);
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
-        }
-
-        /* Secciones colapsables */
-        .collapsible-form-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            padding: 10px 0;
-        }
-
-        .collapsible-form-header:hover h3 {
-            color: var(--accent-primary);
-        }
-
-        .toggle-icon {
-            font-size: 1.25rem;
-            transition: var(--transition);
-        }
-
-        .collapsed .toggle-icon {
-            transform: rotate(-90deg);
-        }
-
-        .collapsible-content {
-            max-height: 1000px;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            margin-top: 10px;
-        }
-
-        .collapsed .collapsible-content {
-            max-height: 0;
-            margin-top: 0;
-            overflow: hidden;
-        }
-    </style>
-</head>
-<body class="collapsed" id="collapsible-card">
-<div class="container">
-    <div class="navigation-row">
-        <button class="btn-nav" onclick="window.location.href='admin.html'">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m12 19-7-7 7-7"/>
-                <path d="M19 12H5"/>
-            </svg>
-            VOLVER AL PANEL DE CAJA
-        </button>
-        <button class="btn-nav" onclick="window.location.href='index.html'">
-            🏪 IR AL MOSTRADOR
-        </button>
-    </div>
-
-    <!-- CARGAR / EDITAR PRODUCTO -->
-    <div class="panel-card" id="form-panel-card" style="display: none; margin-bottom: 20px;">
-        <h3 style="border-bottom: 2px solid var(--border-color); padding-bottom: 8px; margin-top: 0; display: flex; align-items: center; gap: 8px;">
-            ✏️ <span id="form-title">EDITAR PRODUCTO</span>
-        </h3>
+    try {
+        const url = `https://api.github.com/repos/${username}/${repo}/contents/${filePath}`;
+        const response = await fetchWithTimeout(url, {
+            headers: { Authorization: `token ${token}` }
+        });
         
-        <div style="margin-top: 16px;">
-            <div class="form-row">
-                <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
-                    <label>Código de Barras</label>
-                    <input type="text" id="admin-codigo" readonly style="opacity: 0.7; cursor: not-allowed;">
-                </div>
-            </div>
+        if (response.status === 404) {
+            return [];
+        }
+        
+        if (response.ok) {
+            const data = await response.json();
+            const decodedContent = decodeURIComponent(escape(atob(data.content)));
+            return JSON.parse(decodedContent);
+        }
+    } catch (error) {
+        console.error(`Error leyendo ${filePath} desde GitHub:`, error);
+    }
+    return null;
+}
 
-            <div class="form-grid">
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <label>Nombre del Producto</label>
-                    <input type="text" id="admin-nombre" placeholder="Nombre descriptivo">
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <label>Precio $</label>
-                    <input type="number" id="admin-precio" placeholder="Precio de venta">
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <label>Tipo de Venta</label>
-                    <select id="admin-tipo">
-                        <option value="fijo">Precio Fijo (Unitario)</option>
-                        <option value="variable">Precio Variable (Peso / Fiambrería)</option>
-                    </select>
-                </div>
-            </div>
+async function guardarEnGitHub(filePath, data, mensajeCommit) {
+    if (!navigator.onLine) return false;
+    const token = localStorage.getItem('github_token');
+    const username = localStorage.getItem('github_username') || DEFAULT_USERNAME;
+    const repo = localStorage.getItem('github_repo') || DEFAULT_REPO;
+    if (!token) return false;
 
-            <div style="display: flex; gap: 12px; margin-top: 16px;">
-                <button id="btn-guardar" class="btn btn-success" style="flex: 2; font-size: 1.1rem;" onclick="guardarProducto()">
-                    💾 GUARDAR CAMBIOS
-                </button>
-                <button id="btn-cancelar-edit" class="btn" style="flex: 1; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color);" onclick="cancelarEdicion()">
-                    Cancelar
-                </button>
-            </div>
-        </div>
-    </div>
+    try {
+        const sha = await obtenerShaGitHub(filePath);
+        const url = `https://api.github.com/repos/${username}/${repo}/contents/${filePath}`;
+        const jsonString = JSON.stringify(data, null, 2);
+        const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
 
-    <!-- LISTA DE INVENTARIO -->
-    <div class="panel-card">
-        <h3 style="margin-top: 0; display: flex; align-items: center; gap: 8px;">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/>
-                <path d="M12 6v6l4 2"/>
-            </svg>
-            INVENTARIO TOTAL
-        </h3>
+        const body = {
+            message: mensajeCommit,
+            content: contentBase64
+        };
+        if (sha) {
+            body.sha = sha;
+        }
 
-        <!-- BUSCADOR DE PRODUCTOS -->
-        <div class="search-container" style="margin-top: 20px;">
-            <input type="text" id="search-box" placeholder="Buscar productos por nombre, código de barras o letras..." autocomplete="off" oninput="filtrarProductos()">
-            <div class="search-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"/>
-                    <path d="m21 21-4.3-4.3"/>
-                </svg>
-            </div>
-        </div>
+        const updateResponse = await fetchWithTimeout(url, {
+            method: 'PUT',
+            headers: {
+                Authorization: `token ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
 
-        <div class="contenedor-tabla">
-            <table id="tabla-productos">
-                <thead>
-                    <tr>
-                        <th>Código</th>
-                        <th>Producto</th>
-                        <th>Precio</th>
-                        <th style="width: 160px; text-align: center;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: var(--text-secondary); font-style: italic;">Cargando inventario...</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+        return updateResponse.ok;
+    } catch (error) {
+        console.error(`Error guardando ${filePath} en GitHub:`, error);
+        return false;
+    }
+}
 
-<script src="inventario.js"></script>
-</body>
-</html>
+async function apiGet(ruta, fallbackKey) {
+    const fileName = RUTA_A_ARCHIVO[ruta];
+    
+    const token = localStorage.getItem('github_token');
+    if (navigator.onLine && token && fileName) {
+        const dataGithub = await leerDesdeGitHub(fileName);
+        if (dataGithub !== null) {
+            localStorage.setItem(fallbackKey, JSON.stringify(dataGithub));
+            return dataGithub;
+        }
+    }
+
+    try {
+        const response = await fetch('./productos.json');
+        if (response.ok) {
+            const data = await response.json();
+            localStorage.setItem(fallbackKey, JSON.stringify(data));
+            return data;
+        }
+    } catch (e) {}
+
+    return JSON.parse(localStorage.getItem(fallbackKey)) || [];
+}
+
+async function apiPost(ruta, data, fallbackKey) {
+    localStorage.setItem(fallbackKey, JSON.stringify(data));
+    
+    const fileName = RUTA_A_ARCHIVO[ruta];
+    let githubOk = false;
+
+    const token = localStorage.getItem('github_token');
+    if (navigator.onLine && token && fileName) {
+        githubOk = await guardarEnGitHub(fileName, data, `Actualización de productos - Inventario`);
+    }
+
+    return githubOk;
+}
+
+// --- RENDERIZADO Y FILTRADO ---
+function renderTablaProductos(lista) {
+    const tbody = document.querySelector('#tabla-productos tbody');
+    if (!tbody) return;
+
+    tbody.innerHTML = '';
+
+    if (lista.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-secondary); font-style: italic;">
+                    No se encontraron productos en el inventario.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    // Ordenar alfabéticamente
+    lista.sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+    lista.forEach((p) => {
+        const tr = document.createElement('tr');
+
+        tr.innerHTML = `
+            <td><strong>${p.id}</strong></td>
+            <td>${p.nombre}</td>
+            <td>$${p.precio.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+            <td style="text-align: center; display: flex; gap: 8px; justify-content: center;">
+                <button class="btn btn-edit btn-icon-only" onclick="editarProducto('${p.id}')" title="Editar producto">✏️</button>
+                <button class="btn btn-danger btn-icon-only" onclick="eliminarProducto('${p.id}')" title="Eliminar producto">🗑️</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function filtrarProductos() {
+    const query = document.getElementById('search-box').value.trim();
+    
+    if (!query) {
+        renderTablaProductos(inventario);
+        return;
+    }
+
+    const queryNorm = normalizarTexto(query);
+    const filtrados = inventario.filter(p => 
+        normalizarTexto(p.nombre).includes(queryNorm) ||
+        normalizarTexto(p.id).includes(queryNorm)
+    );
+
+    renderTablaProductos(filtrados);
+}
+
+// --- CARGAR / GUARDAR / EDITAR / ELIMINAR ---
+async function guardarProducto() {
+    if (!editandoCodigo) return;
+
+    const idInput = document.getElementById('admin-codigo');
+    const nomInput = document.getElementById('admin-nombre');
+    const preInput = document.getElementById('admin-precio');
+    const tipInput = document.getElementById('admin-tipo');
+
+    const id = idInput.value.trim().toUpperCase();
+    const nom = nomInput.value.trim();
+    const pre = parseFloat(preInput.value);
+    const tip = tipInput.value;
+
+    if (!id || !nom || isNaN(pre)) {
+        alert("⚠️ Faltan completar datos obligatorios (Código, Nombre y Precio).");
+        return;
+    }
+
+    if (pre < 0) {
+        alert("⚠️ Valores inválidos. El precio no puede ser negativo.");
+        return;
+    }
+
+    const idxExistente = inventario.findIndex(p => p.id === id);
+
+    if (idxExistente > -1) {
+        const oldProduct = inventario[idxExistente];
+        inventario[idxExistente] = { ...oldProduct, id, nombre: nom, precio: pre, tipo: tip };
+        delete inventario[idxExistente].stock;
+    } else {
+        alert("⚠️ El producto no existe en el inventario.");
+        return;
+    }
+
+    // Guardar base de datos
+    await apiPost('/api/inventario', inventario, 'inventario');
+    
+    cancelarEdicion();
+    renderTablaProductos(inventario);
+    filtrarProductos(); // Por si había algún filtro activo
+    beepSuccess();
+}
+
+function editarProducto(codigo) {
+    const p = inventario.find(item => item.id === codigo);
+    if (!p) return;
+
+    editandoCodigo = p.id;
+    document.getElementById('admin-codigo').value = p.id;
+    document.getElementById('admin-nombre').value = p.nombre;
+    document.getElementById('admin-precio').value = p.precio;
+    document.getElementById('admin-tipo').value = p.tipo;
+
+    expandirFormulario();
+    document.getElementById('admin-nombre').focus();
+}
+
+function cancelarEdicion() {
+    editandoCodigo = null;
+    document.getElementById('admin-codigo').value = '';
+    document.getElementById('admin-nombre').value = '';
+    document.getElementById('admin-precio').value = '';
+    document.getElementById('admin-tipo').value = 'fijo';
+    
+    colapsarFormulario();
+}
+
+async function eliminarProducto(codigo) {
+    const p = inventario.find(item => item.id === codigo);
+    if (!p) return;
+
+    if (confirm(`¿Está seguro de eliminar "${p.nombre}" del inventario?\nEsta acción es irreversible.`)) {
+        inventario = inventario.filter(item => item.id !== codigo);
+        await apiPost('/api/inventario', inventario, 'inventario');
+        renderTablaProductos(inventario);
+        filtrarProductos();
+    }
+}
+
+function beepSuccess() {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(900, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+        oscillator.connect(gain);
+        gain.connect(audioCtx.destination);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+    } catch (e) { }
+}
+
+// --- INICIALIZACIÓN ---
+async function inicializarInventario() {
+    inventario = await apiGet('/api/inventario', 'inventario');
+    renderTablaProductos(inventario);
+}
+
+inicializarInventario();
