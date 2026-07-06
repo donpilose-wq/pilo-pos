@@ -20,8 +20,8 @@ if (acceso !== PIN_ADMIN) {
 }
 
 // Configuración de sincronización de GitHub (Valores por defecto)
-const DEFAULT_USERNAME = "ghanacafe2-cloud";
-const DEFAULT_REPO = "menuclick";
+const DEFAULT_USERNAME = "donpilose-wq";
+const DEFAULT_REPO = "pilo-pos";
 
 const RUTA_A_ARCHIVO = {
     '/api/inventario': 'productos.json',
