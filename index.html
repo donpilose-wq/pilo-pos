@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kiosco El Cholo - POS Profesional</title>
+    <title>pos venta El Cholo - POS Profesional</title>
     <!-- Google Fonts: Outfit for titles, Inter for body -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -460,6 +460,135 @@
             #ventas, #totales { flex: none; height: auto; }
             body { overflow-y: auto; }
         }
+
+        /* Modal Catálogo */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 14, 23, 0.7);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            animation: slideUp 0.2s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h3 {
+            margin: 0;
+            font-family: 'Outfit', sans-serif;
+            color: var(--warning);
+            font-size: 1.3rem;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .modal-close:hover {
+            color: var(--danger);
+        }
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .grid-catalogo {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+            overflow-y: auto;
+            flex: 1;
+            padding-right: 4px;
+        }
+        .tarjeta-producto {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .tarjeta-producto:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+        .tarjeta-producto-info strong {
+            display: block;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .tarjeta-producto-info span {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+        .tarjeta-producto-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+        }
+        .tarjeta-producto-precio {
+            color: var(--warning);
+            font-weight: 700;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.1rem;
+        }
+        .tarjeta-producto-stock {
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            font-weight: 600;
+        }
+        .stock-bajo {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -478,8 +607,7 @@
             <p>Sistema de Gestión de Ventas & POS</p>
         </div>
     </div>
-    <div class="header-right" style="display: flex; align-items: center; gap: 12px;">
-        <span id="estado-conexion" style="font-size: 0.85rem; font-weight: 700; padding: 6px 12px; border-radius: 8px; font-family: 'Outfit', sans-serif; transition: var(--transition);">Detectando...</span>
+    <div class="header-right">
         <div id="reloj" class="clock">00:00:00</div>
     </div>
 </header>
@@ -501,6 +629,11 @@
                 </div>
             </div>
         </div>
+
+        <!-- BOTÓN VER TODOS LOS PRODUCTOS -->
+        <button id="btn-ver-catalogo" onclick="abrirModalCatalogo()" style="margin-bottom: 15px; background: var(--bg-tertiary); color: var(--warning); border: 1px solid var(--border-color); padding: 14px; font-size: 1.05rem; font-family: 'Outfit', sans-serif; font-weight: 600; border-radius: 12px; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition);">
+            📖 VER TODOS LOS PRODUCTOS / CATÁLOGO
+        </button>
         
         <!-- Sugerencias de búsqueda manual -->
         <div id="lista-sugerencias" class="sugerencias-container"></div>
@@ -544,7 +677,13 @@
                 FINALIZAR VENTA
             </button>
             
-
+            <button class="btn btn-fiado" onclick="enviarAFiado()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 20h9"/>
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+                </svg>
+                ANOTAR EN FIADOS
+            </button>
 
             <button class="btn btn-cancelar" onclick="cancelarCarrito()">
                 🚫 Cancelar Carrito
@@ -557,33 +696,108 @@
     </div>
 </div>
 
+<!-- MODAL DE CATÁLOGO DE PRODUCTOS -->
+<div id="modal-catalogo" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>📖 Catálogo de Productos</h3>
+            <button class="modal-close" onclick="cerrarModalCatalogo()">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="search-container" style="margin-bottom: 16px; position: relative;">
+                <input type="text" id="filtro-catalogo" placeholder="Buscar por nombre o código..." oninput="filtrarCatalogo()" style="width: 100%; padding: 12px 12px 12px 40px; font-size: 1rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary); outline: none;">
+                <div class="search-icon" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-secondary); pointer-events: none;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.3-4.3"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="grid-catalogo" id="grid-catalogo-productos">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="script.js"></script>
 <script>
-    // Reloj digital y detector de conexión en la cabecera
+    // Reloj digital en la cabecera
     function actualizarReloj() {
         const ahora = new Date();
         const hrs = String(ahora.getHours()).padStart(2, '0');
         const mins = String(ahora.getMinutes()).padStart(2, '0');
         const segs = String(ahora.getSeconds()).padStart(2, '0');
         document.getElementById('reloj').innerText = `${hrs}:${mins}:${segs}`;
-
-        const estadoCon = document.getElementById('estado-conexion');
-        if (estadoCon) {
-            if (navigator.onLine) {
-                estadoCon.innerText = "☁️ SINCRONIZADO";
-                estadoCon.style.background = "rgba(16, 185, 129, 0.12)";
-                estadoCon.style.color = "var(--success)";
-                estadoCon.style.border = "1px solid rgba(16, 185, 129, 0.2)";
-            } else {
-                estadoCon.innerText = "🔌 MODO OFFLINE";
-                estadoCon.style.background = "rgba(239, 68, 68, 0.12)";
-                estadoCon.style.color = "var(--danger)";
-                estadoCon.style.border = "1px solid rgba(239, 68, 68, 0.2)";
-            }
-        }
     }
     setInterval(actualizarReloj, 1000);
     actualizarReloj();
+
+    // Funciones del Catálogo Modal
+    function abrirModalCatalogo() {
+        document.getElementById('modal-catalogo').style.display = 'flex';
+        document.getElementById('filtro-catalogo').value = '';
+        document.getElementById('filtro-catalogo').focus();
+        renderizarCatalogo();
+    }
+
+    function cerrarModalCatalogo() {
+        document.getElementById('modal-catalogo').style.display = 'none';
+        const input = document.getElementById('codigo');
+        if (input) input.focus();
+    }
+
+    function renderizarCatalogo() {
+        const grid = document.getElementById('grid-catalogo-productos');
+        if (!grid) return;
+        grid.innerHTML = '';
+        
+        const filtro = document.getElementById('filtro-catalogo').value.trim().toUpperCase();
+        
+        // Filtrar productos
+        const productosFiltrados = productosDB.filter(p => 
+            p.nombre.toUpperCase().includes(filtro) || 
+            p.id.toUpperCase().includes(filtro)
+        );
+        
+        if (productosFiltrados.length === 0) {
+            grid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; color: var(--text-secondary); margin-top: 40px;">No se encontraron productos.</div>`;
+            return;
+        }
+        
+        // Ordenar alfabéticamente
+        productosFiltrados.sort((a, b) => a.nombre.localeCompare(b.nombre));
+        
+        productosFiltrados.forEach(p => {
+            const esVariable = p.tipo === "variable";
+            const stockText = esVariable ? "Precio Variable" : `Stock: ${p.stock}`;
+            const isBajo = !esVariable && p.stock <= 3;
+            const stockClass = isBajo ? 'stock-bajo' : '';
+            const precioText = esVariable ? "Variable" : `$${p.precio.toLocaleString('es-AR')}`;
+            
+            grid.innerHTML += `
+                <div class="tarjeta-producto" onclick="seleccionarProductoCatalogo('${p.id}')">
+                    <div class="tarjeta-producto-info">
+                        <strong>${p.nombre}</strong>
+                        <span>Cód: ${p.id}</span>
+                    </div>
+                    <div class="tarjeta-producto-meta">
+                        <span class="tarjeta-producto-precio">${precioText}</span>
+                        <span class="tarjeta-producto-stock ${stockClass}">${stockText}</span>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function filtrarCatalogo() {
+        renderizarCatalogo();
+    }
+
+    function seleccionarProductoCatalogo(codigo) {
+        procesarEscaneo(codigo);
+        cerrarModalCatalogo();
+    }
 </script>
 </body>
 </html>
