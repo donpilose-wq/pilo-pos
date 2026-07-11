@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "total": 120000,
+    "metodo": "efectivo",
+    "fecha": "11/7/2026, 17:56:13",
+    "productos": [
+      {
+        "id": "prod0044",
+        "nombre": "Asado por kilo",
+        "precio": "52000",
+        "cantidad": 1,
+        "subtotal": 52000
+      },
+      {
+        "id": "prod0056",
+        "nombre": "Bondiola",
+        "precio": "52000",
+        "cantidad": 1,
+        "subtotal": 52000
+      },
+      {
+        "id": "prod0002",
+        "nombre": "Canelones",
+        "precio": "16000",
+        "cantidad": 1,
+        "subtotal": 16000
+      }
+    ]
+  }
+]
