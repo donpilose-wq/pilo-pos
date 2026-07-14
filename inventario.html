@@ -364,41 +364,23 @@
     </div>
 
     <!-- CARGAR / EDITAR PRODUCTO -->
-    <div class="panel-card">
-        <div class="collapsible-form-header" onclick="toggleFormCollapse()">
-            <h3 style="border-bottom: none; padding-bottom: 0; margin-top: 0; flex: 1; display: flex; align-items: center; gap: 8px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 5v14"/>
-                    <path d="M5 12h14"/>
-                </svg>
-                <span id="form-title">NUEVO PRODUCTO / EDITAR EXISTENTE</span>
-            </h3>
-            <span class="toggle-icon">▼</span>
-        </div>
+    <div class="panel-card" id="form-panel-card" style="display: none; margin-bottom: 20px;">
+        <h3 style="border-bottom: 2px solid var(--border-color); padding-bottom: 8px; margin-top: 0; display: flex; align-items: center; gap: 8px;">
+            ✏️ <span id="form-title">EDITAR PRODUCTO</span>
+        </h3>
         
-        <div class="collapsible-content">
-            <!-- Visor de cámara scanner -->
-            <div id="reader"></div>
-
-            <div class="form-row" style="margin-top: 16px;">
-                <input type="text" id="admin-codigo" placeholder="Código de barras (Escanear o escribir)">
-                <button type="button" class="btn btn-scanner" onclick="toggleEscaner()" title="Abrir cámara para escanear">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                        <circle cx="12" cy="13" r="4"/>
-                    </svg>
-                    CÁMARA
-                </button>
+        <div style="margin-top: 16px;">
+            <div class="form-row">
+                <div style="display: flex; flex-direction: column; gap: 6px; flex: 1;">
+                    <label>Código de Barras</label>
+                    <input type="text" id="admin-codigo" readonly style="opacity: 0.7; cursor: not-allowed;">
+                </div>
             </div>
 
             <div class="form-grid">
                 <div style="display: flex; flex-direction: column; gap: 6px;">
                     <label>Nombre del Producto</label>
                     <input type="text" id="admin-nombre" placeholder="Nombre descriptivo">
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <label>Stock Disponible</label>
-                    <input type="number" id="admin-stock" placeholder="Cantidad física">
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 6px;">
                     <label>Precio $</label>
@@ -415,9 +397,9 @@
 
             <div style="display: flex; gap: 12px; margin-top: 16px;">
                 <button id="btn-guardar" class="btn btn-success" style="flex: 2; font-size: 1.1rem;" onclick="guardarProducto()">
-                    💾 GUARDAR EN EL INVENTARIO
+                    💾 GUARDAR CAMBIOS
                 </button>
-                <button id="btn-cancelar-edit" class="btn" style="flex: 1; display: none; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color);" onclick="cancelarEdicion()">
+                <button id="btn-cancelar-edit" class="btn" style="flex: 1; background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border-color);" onclick="cancelarEdicion()">
                     Cancelar
                 </button>
             </div>
@@ -452,7 +434,6 @@
                         <th>Código</th>
                         <th>Producto</th>
                         <th>Precio</th>
-                        <th>Stock</th>
                         <th style="width: 160px; text-align: center;">Acciones</th>
                     </tr>
                 </thead>
