@@ -1,16 +1,5 @@
-// Panel de Administración - El Cholo
+// Panel de Administración - Kiosco El Cholo
 const PIN_ADMIN = "123";
-
-// Inicializar credenciales de GitHub si no están configuradas
-if (!localStorage.getItem('github_token')) {
-    localStorage.setItem('github_token', 'ghp_' + '3jLK3OeTyz' + 'hti9rYYvYh' + 'CQd3w9diN42ECqSz');
-}
-if (!localStorage.getItem('github_username')) {
-    localStorage.setItem('github_username', 'ghanacafe2-cloud');
-}
-if (!localStorage.getItem('github_repo')) {
-    localStorage.setItem('github_repo', 'menuclick');
-}
 
 // Control de acceso seguro
 const acceso = prompt("Ingrese PIN de administrador para acceder a este panel:");
@@ -26,12 +15,10 @@ const DEFAULT_REPO = "pilo-pos";
 const RUTA_A_ARCHIVO = {
     '/api/inventario': 'productos.json',
     '/api/ventas': 'ventas.json',
-    '/api/fiados': 'fiados.json',
     '/api/historial-cierres': 'historial_cierres.json'
 };
 
 let inventario = [];
-let fiados = [];
 let ventas = [];
 let historialCierres = [];
 
@@ -51,6 +38,23 @@ function guardarConfiguracionGitHub() {
 // GuardarToken antiguo para compatibilidad por si se llama desde algún lado
 function guardarToken() {
     guardarConfiguracionGitHub();
+}
+
+async function fetchWithTimeout(resource, options = {}) {
+    const { timeout = 2500 } = options;
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    try {
+        const response = await fetch(resource, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        throw error;
+    }
 }
 
 async function validarToken() {
@@ -75,8 +79,14 @@ async function validarToken() {
         return;
     }
 
+    if (!navigator.onLine) {
+        statusSpan.innerText = "🔌 (Offline - Sin Internet)";
+        statusSpan.style.color = "var(--danger)";
+        return;
+    }
+
     try {
-        const res = await fetch(`https://api.github.com/repos/${username}/${repo}`, {
+        const res = await fetchWithTimeout(`https://api.github.com/repos/${username}/${repo}`, {
             headers: { Authorization: `token ${token}` }
         });
         if (res.ok) {
@@ -94,14 +104,15 @@ async function validarToken() {
 
 // --- FUNCIONES API DE GITHUB ---
 async function obtenerShaGitHub(filePath) {
+    if (!navigator.onLine) return null;
     const token = localStorage.getItem('github_token');
     const username = localStorage.getItem('github_username') || DEFAULT_USERNAME;
-    const repo = localStorage.getItem('github_repo') || DEFAULT_REPO;
+    const repo = (filePath === 'productos.json') ? 'menuclick' : (localStorage.getItem('github_repo') || DEFAULT_REPO);
     if (!token) return null;
 
     try {
         const url = `https://api.github.com/repos/${username}/${repo}/contents/${filePath}`;
-        const response = await fetch(url, {
+        const response = await fetchWithTimeout(url, {
             headers: { Authorization: `token ${token}` }
         });
         if (response.ok) {
@@ -115,14 +126,15 @@ async function obtenerShaGitHub(filePath) {
 }
 
 async function leerDesdeGitHub(filePath) {
+    if (!navigator.onLine) return null;
     const token = localStorage.getItem('github_token');
     const username = localStorage.getItem('github_username') || DEFAULT_USERNAME;
-    const repo = localStorage.getItem('github_repo') || DEFAULT_REPO;
+    const repo = (filePath === 'productos.json') ? 'menuclick' : (localStorage.getItem('github_repo') || DEFAULT_REPO);
     if (!token) return null;
 
     try {
         const url = `https://api.github.com/repos/${username}/${repo}/contents/${filePath}`;
-        const response = await fetch(url, {
+        const response = await fetchWithTimeout(url, {
             headers: { Authorization: `token ${token}` }
         });
 
@@ -142,9 +154,10 @@ async function leerDesdeGitHub(filePath) {
 }
 
 async function guardarEnGitHub(filePath, data, mensajeCommit) {
+    if (!navigator.onLine) return false;
     const token = localStorage.getItem('github_token');
     const username = localStorage.getItem('github_username') || DEFAULT_USERNAME;
-    const repo = localStorage.getItem('github_repo') || DEFAULT_REPO;
+    const repo = (filePath === 'productos.json') ? 'menuclick' : (localStorage.getItem('github_repo') || DEFAULT_REPO);
     if (!token) return false;
 
     try {
@@ -161,7 +174,7 @@ async function guardarEnGitHub(filePath, data, mensajeCommit) {
             body.sha = sha;
         }
 
-        const updateResponse = await fetch(url, {
+        const updateResponse = await fetchWithTimeout(url, {
             method: 'PUT',
             headers: {
                 Authorization: `token ${token}`,
@@ -186,9 +199,9 @@ async function subirInventarioAGitHub() {
 async function apiGet(ruta, fallbackKey) {
     const fileName = RUTA_A_ARCHIVO[ruta];
 
-    // 1. Intentar con GitHub si hay token
+    // 1. Intentar con GitHub si hay internet y token
     const token = localStorage.getItem('github_token');
-    if (token && fileName) {
+    if (navigator.onLine && token && fileName) {
         console.log(`☁️ Intentando cargar ${fileName} desde GitHub...`);
         const dataGithub = await leerDesdeGitHub(fileName);
         if (dataGithub !== null) {
@@ -210,9 +223,9 @@ async function apiPost(ruta, data, fallbackKey) {
     const fileName = RUTA_A_ARCHIVO[ruta];
     let githubOk = false;
 
-    // 1. Guardar en GitHub si hay token
+    // 1. Guardar en GitHub si hay internet y token
     const token = localStorage.getItem('github_token');
-    if (token && fileName) {
+    if (navigator.onLine && token && fileName) {
         console.log(`☁️ Intentando subir ${fileName} a GitHub...`);
         githubOk = await guardarEnGitHub(fileName, data, `Actualización de ${fileName} - Panel Admin`);
         if (githubOk) {
@@ -228,23 +241,32 @@ async function apiPost(ruta, data, fallbackKey) {
 
 // --- GESTIÓN DE GASTOS / EGRESOS ---
 async function registrarGasto() {
+    const tipo = document.getElementById('gasto-tipo').value;
     const det = document.getElementById('gasto-detalle').value.trim();
     const mon = parseFloat(document.getElementById('gasto-monto').value);
 
     if (!det || isNaN(mon) || mon <= 0) {
-        alert("⚠️ Por favor, complete el detalle y el monto del pago correctamente.");
+        const errorMsg = tipo === 'adelanto' 
+            ? "⚠️ Por favor, complete el nombre del empleado y el monto del adelanto."
+            : "⚠️ Por favor, complete el detalle y el monto del pago correctamente.";
+        alert(errorMsg);
         return;
     }
 
-    if (confirm(`¿Confirmas el registro del pago de $${mon.toLocaleString('es-AR')} por: "${det}"?`)) {
+    const confirmMsg = tipo === 'adelanto'
+        ? `¿Confirmas registrar el adelanto de sueldo de $${mon.toLocaleString('es-AR')} para: "${det}"?\n(Se descontará de la caja diaria)`
+        : `¿Confirmas el registro del pago de $${mon.toLocaleString('es-AR')} por: "${det}"?`;
+
+    if (confirm(confirmMsg)) {
         // Cargar ventas actuales
         ventas = await apiGet('/api/ventas', 'ventas_realizadas');
 
+        const prefijo = tipo === 'adelanto' ? 'ADELANTO SUELDO' : 'GASTO';
         const nuevoGasto = {
             total: -mon, // Monto negativo representa salida de caja
             metodo: 'efectivo',
             fecha: new Date().toLocaleString(),
-            detalle: `GASTO: ${det}`
+            detalle: `${prefijo}: ${det}`
         };
 
         ventas.push(nuevoGasto);
@@ -257,6 +279,17 @@ async function registrarGasto() {
 
         actualizarTodo();
         beepSuccess();
+    }
+}
+
+function toggleTipoGasto() {
+    const tipo = document.getElementById('gasto-tipo').value;
+    const detInput = document.getElementById('gasto-detalle');
+    if (!detInput) return;
+    if (tipo === 'adelanto') {
+        detInput.placeholder = "Nombre del empleado (Ej: Juan Pérez)";
+    } else {
+        detInput.placeholder = "Detalle del gasto (Ej: Panadería, Coca-cola, Gas, Luz)";
     }
 }
 
@@ -303,62 +336,6 @@ async function limpiarSoloGastos() {
     }
 }
 
-// Las funciones de gestión de productos y cámara se movieron a inventario.js
-
-// --- LIBRETA DE FIADOS ---
-async function agregarFiado() {
-    const cli = document.getElementById('fiado-cliente').value.trim();
-    const mon = parseFloat(document.getElementById('fiado-monto').value);
-
-    if (!cli || isNaN(mon) || mon <= 0) {
-        alert("⚠️ Ingrese un nombre de cliente y un monto válido.");
-        return;
-    }
-
-    const idx = fiados.findIndex(f => f.cliente.toUpperCase() === cli.toUpperCase());
-    if (idx > -1) {
-        fiados[idx].monto += mon;
-    } else {
-        fiados.push({ cliente: cli, monto: mon });
-    }
-
-    await apiPost('/api/fiados', fiados, 'fiados');
-    document.getElementById('fiado-cliente').value = '';
-    document.getElementById('fiado-monto').value = '';
-    actualizarTodo();
-    beepSuccess();
-}
-
-async function cobrarFiado(index) {
-    const f = fiados[index];
-    const modo = prompt(`Cobrar deuda de $${f.monto.toLocaleString('es-AR')} a "${f.cliente}":\n\n1: Cobrar con EFECTIVO\n2: Cobrar con TARJETA\n3: Cobrar con QR / MercadoPago\n\nIngrese el número correspondiente:`);
-
-    let met = modo === "1" ? "efectivo" : modo === "2" ? "debito" : modo === "3" ? "qr" : null;
-    if (met) {
-        // Cargar ventas actualizadas de la API
-        ventas = await apiGet('/api/ventas', 'ventas_realizadas');
-
-        ventas.push({
-            total: f.monto,
-            metodo: met,
-            fecha: new Date().toLocaleString(),
-            detalle: `COBRO FIADO: ${f.cliente}`
-        });
-
-        fiados.splice(index, 1);
-
-        // Guardar ambos en la API
-        await apiPost('/api/ventas', ventas, 'ventas_realizadas');
-        await apiPost('/api/fiados', fiados, 'fiados');
-
-        actualizarTodo();
-        beepSuccess();
-        alert(`✅ Deuda saldada. Registrado en caja de ${met.toUpperCase()}.`);
-    } else if (modo !== null) {
-        alert("❌ Opción inválida.");
-    }
-}
-
 // --- CIERRE DE CAJA ---
 async function borrarVentas() {
     if (ventas.length === 0) return alert("No hay movimientos de caja cargados en el turno de hoy.");
@@ -375,9 +352,8 @@ async function borrarVentas() {
 
     const general = e + t + q;
     const totalGastos = gastosSolo.reduce((acc, g) => acc + Math.abs(g.total), 0);
-    const totalFiados = fiados.reduce((acc, f) => acc + f.monto, 0);
 
-    if (confirm(`¿CERRAR CAJA DE HOY?\n\n📊 Resumen Financiero:\n--------------------------\n💵 Efectivo Neto: $${e.toLocaleString('es-AR')}\n💳 Tarjetas/Débito: $${t.toLocaleString('es-AR')}\n📱 QR/MercadoPago: $${q.toLocaleString('es-AR')}\n➖ Gastos/Pagos: $${totalGastos.toLocaleString('es-AR')}\n--------------------------\n💰 TOTAL GENERAL: $${general.toLocaleString('es-AR')}\n🧾 Ventas realizadas: ${ventasSolo.length}\n📝 Fiados pendientes: ${fiados.length} clientes ($${totalFiados.toLocaleString('es-AR')})\n\nSe guardará el detalle completo en historial_cierres.json`)) {
+    if (confirm(`¿CERRAR CAJA DE HOY?\n\n📊 Resumen Financiero:\n--------------------------\n💵 Efectivo Neto: $${e.toLocaleString('es-AR')}\n💳 Tarjetas/Débito: $${t.toLocaleString('es-AR')}\n📱 QR/MercadoPago: $${q.toLocaleString('es-AR')}\n➖ Gastos/Pagos: $${totalGastos.toLocaleString('es-AR')}\n--------------------------\n💰 TOTAL GENERAL: $${general.toLocaleString('es-AR')}\n🧾 Ventas realizadas: ${ventasSolo.length}\n\nSe guardará el detalle completo en historial_cierres.json`)) {
 
         // Cargar historial actual de la API
         historialCierres = await apiGet('/api/historial-cierres', 'historial_cierres');
@@ -399,14 +375,7 @@ async function borrarVentas() {
                 metodo: v.metodo || 'efectivo',
                 detalle: v.detalle || 'Venta',
                 productos: v.productos || []
-            })),
-
-            // Snapshot de fiados activos al momento del cierre
-            fiados_al_cierre: fiados.map(f => ({
-                cliente: f.cliente,
-                deuda: f.monto
-            })),
-            total_fiados_pendientes: totalFiados
+            }))
         };
 
         historialCierres.push(cierreCompleto);
@@ -414,16 +383,15 @@ async function borrarVentas() {
         // Limpiar ventas del dia
         ventas = [];
 
-        // Guardar historial completo (con detalle) + ventas vacias + fiados en disco (JSON)
+        // Guardar historial completo (con detalle) + ventas vacias en disco (JSON)
         const okHistorial = await apiPost('/api/historial-cierres', historialCierres, 'historial_cierres');
         const okVentas = await apiPost('/api/ventas', ventas, 'ventas_realizadas');
-        await apiPost('/api/fiados', fiados, 'fiados');
 
         actualizarTodo();
         beepSuccess();
 
         if (okHistorial && okVentas) {
-            alert(`✅ Caja cerrada y guardada correctamente en historial_cierres.json\n\n📁 Se guardaron:\n• ${cierreCompleto.cantidad_ventas} ventas del dia\n• ${gastosSolo.length} egresos/gastos\n• ${fiados.length} fiados pendientes al cierre\n\n💰 Total del dia: $${general.toLocaleString('es-AR')}`);
+            alert(`✅ Caja cerrada y guardada correctamente en historial_cierres.json\n\n📁 Se guardaron:\n• ${cierreCompleto.cantidad_ventas} ventas del dia\n• ${gastosSolo.length} egresos/gastos\n\n💰 Total del dia: $${general.toLocaleString('es-AR')}`);
         } else {
             alert(`⚠️ Cierre guardado en memoria del navegador.\nAsegurate de que el servidor server.py este corriendo para guardar en los archivos JSON.`);
         }
@@ -444,23 +412,10 @@ async function anularUltimaVentaAdmin() {
     const ultima = ventas[ventas.length - 1];
 
     if (confirm(`¿Anular el último movimiento registrado?\nDetalle: "${ultima.detalle || 'Venta general'}"\nMonto: $${ultima.total.toLocaleString('es-AR')}`)) {
-
-        // Devolver stock si era una venta general con productos detallados
-        if (ultima.total > 0 && ultima.productos) {
-            ultima.productos.forEach(prod => {
-                const enDB = inventario.find(p => p.id === prod.id);
-                if (enDB && enDB.tipo !== "variable") {
-                    enDB.stock += prod.cantidad;
-                }
-            });
-            await apiPost('/api/inventario', inventario, 'inventario');
-            subirInventarioAGitHub();
-        }
-
         ventas.pop();
         await apiPost('/api/ventas', ventas, 'ventas_realizadas');
         actualizarTodo();
-        alert("✅ Movimiento anulado correctamente. Stock devuelto (si corresponde).");
+        alert("✅ Movimiento anulado correctamente.");
     }
 }
 
@@ -479,46 +434,9 @@ function actualizarTodo() {
     document.getElementById('total-qr').innerText = `$${q.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
     document.getElementById('total-general').innerText = `$${(e + t + q).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`;
 
-    // 2. Alerta de Reposición (Stock <= 3)
-    const reposicion = [];
-    inventario.forEach((p) => {
-        if (p.stock !== undefined && p.stock <= 3 && p.tipo !== "variable") {
-            reposicion.push(p.nombre);
-        }
-    });
 
-    const alerta = document.getElementById('alerta-reposicion');
-    const lista = document.getElementById('lista-reposicion');
-    if (alerta && lista) {
-        if (reposicion.length > 0) {
-            alerta.style.display = 'block';
-            lista.innerHTML = reposicion.map(x => `<li><strong>${x}</strong> - Quedan 3 unidades o menos.</li>`).join('');
-        } else {
-            alerta.style.display = 'none';
-        }
-    }
 
-    // 3. Tabla de Fiados
-    const tbodyFiado = document.querySelector('#tabla-fiados tbody');
-    if (tbodyFiado) {
-        tbodyFiado.innerHTML = '';
 
-        // Ordenar fiados por nombre
-        fiados.sort((a, b) => a.cliente.localeCompare(b.cliente));
-
-        fiados.forEach((f, i) => {
-            tbodyFiado.innerHTML += `
-                <tr>
-                    <td><strong>${f.cliente}</strong></td>
-                    <td style="color: var(--danger); font-weight: bold;">$${f.monto.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-                    <td>
-                        <button class="btn btn-success" style="padding: 6px 12px; font-size: 0.85rem;" onclick="cobrarFiado(${i})">
-                            💸 PAGÓ
-                        </button>
-                    </td>
-                </tr>`;
-        });
-    }
 
     // 4. Tabla Historial de Cierres
     const tbodyHist = document.getElementById('cuerpo-historial');
@@ -526,209 +444,22 @@ function actualizarTodo() {
         tbodyHist.innerHTML = '';
         [...historialCierres].reverse().forEach((c, index) => {
             const realIndex = historialCierres.length - 1 - index;
-            
-            const totalGastosDia = c.total_gastos || 0;
-            const gastosDia = c.ventas_del_dia ? c.ventas_del_dia.filter(v => v.total < 0) : [];
-            const estaExpandido = !!cierresExpandidos[realIndex];
-
             tbodyHist.innerHTML += `
-                <tr class="fila-venta-cabecera" onclick="toggleDetalleCierre(${realIndex})">
-                    <td>
-                        <strong>${c.fecha.split(', ')[0] || c.fecha}</strong> <span style="font-size: 0.8rem; color: var(--text-secondary);">${c.fecha.split(', ')[1] || ''}</span>
-                        <span style="font-size: 0.8rem; color: var(--accent-primary); margin-left: 8px; display: block; margin-top: 4px;">
-                            ${estaExpandido ? '▲ Ocultar egresos' : '▼ Ver egresos'}
-                        </span>
-                    </td>
+                <tr>
+                    <td>${c.fecha}</td>
                     <td>$${c.efectivo.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
                     <td>$${c.otros.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-                    <td style="color: var(--danger); font-weight: bold;">
-                        ${totalGastosDia > 0 ? `-$${totalGastosDia.toLocaleString('es-AR', { minimumFractionDigits: 2 })}` : '$0,00'}
-                    </td>
                     <td style="font-weight: 700; color: var(--success);">$${c.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
                     <td>
-                        <button class="btn btn-danger btn-icon-only" onclick="event.stopPropagation(); borrarCierreHistorial(${realIndex})" title="Borrar del historial">🗑️</button>
+                        <button class="btn btn-danger btn-icon-only" onclick="borrarCierreHistorial(${realIndex})" title="Borrar del historial">🗑️</button>
                     </td>
                 </tr>`;
-            
-            if (estaExpandido) {
-                let filasGastos = '';
-                if (gastosDia.length > 0) {
-                    gastosDia.forEach(g => {
-                        const time = g.fecha ? (g.fecha.split(', ')[1] || g.fecha) : 'Sin hora';
-                        // El detalle usualmente es "GASTO: Coca-cola", limpiamos "GASTO: " si es necesario o lo mostramos directo
-                        const concepto = g.detalle ? g.detalle.replace('GASTO: ', '') : 'Retiro / Gasto';
-                        filasGastos += `
-                            <li>
-                                <span>💸 <strong>${concepto}</strong> (${time})</span>
-                                <span style="color: var(--danger); font-weight: 600;">-$${Math.abs(g.total).toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
-                            </li>
-                        `;
-                    });
-                } else {
-                    filasGastos = `<li><span style="color: var(--text-secondary); font-style: italic;">Sin gastos registrados en este turno.</span></li>`;
-                }
-
-                tbodyHist.innerHTML += `
-                    <tr class="fila-detalle-productos">
-                        <td colspan="6">
-                            <ul class="lista-productos-vendidos" style="border-left: 3px solid var(--danger);">
-                                <li style="border-bottom: 1px dashed var(--border-color); font-weight: bold; color: var(--warning); padding-bottom: 6px; margin-bottom: 6px;">
-                                    <span>DETALLE DE EGRESOS (SALIDAS DE CAJA)</span>
-                                    <span>Total: -$${totalGastosDia.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</span>
-                                </li>
-                                ${filasGastos}
-                            </ul>
-                        </td>
-                    </tr>`;
-            }
         });
     }
 
     // 5. Tabla de Gastos
     dibujarTablaGastos();
-
-    // 6. Tabla de Ventas Detalle
-    dibujarTablaVentasDetalle();
 }
-
-let ventasDetalleExpandidas = {}; // Objeto para controlar qué filas están expandidas
-
-function dibujarTablaVentasDetalle() {
-    const tbody = document.getElementById('cuerpo-ventas-detalle');
-    if (!tbody) return;
-
-    tbody.innerHTML = '';
-
-    // Solo mostrar las ventas reales (total > 0)
-    // Las ordenamos de más reciente a más antigua
-    const ventasFiltradas = ventas.map((v, index) => ({ ...v, originalIndex: index }))
-        .filter(v => v.total > 0)
-        .reverse();
-
-    if (ventasFiltradas.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No hay ventas registradas el día de hoy.</td></tr>`;
-        return;
-    }
-
-    ventasFiltradas.forEach(v => {
-        const time = v.fecha ? (v.fecha.split(', ')[1] || v.fecha) : 'Sin hora';
-
-        // Crear el listado resumido de productos para la cabecera
-        let resumenProductos = "";
-        if (v.productos && v.productos.length > 0) {
-            resumenProductos = v.productos.map(p => `${p.cantidad}x ${p.nombre}`).join(', ');
-            if (resumenProductos.length > 60) {
-                resumenProductos = resumenProductos.substring(0, 57) + "...";
-            }
-        } else {
-            resumenProductos = v.detalle || "Venta general";
-        }
-
-        // Determinar badge del método de pago
-        let badgeClass = "badge-efectivo";
-        let metodoPago = "Efectivo";
-        if (v.metodo === "debito") {
-            badgeClass = "badge-debito";
-            metodoPago = "Tarjeta";
-        } else if (v.metodo === "qr") {
-            badgeClass = "badge-qr";
-            metodoPago = "QR / MP";
-        }
-
-        const key = `venta-${v.originalIndex}`;
-        const estaExpandido = !!ventasDetalleExpandidas[key];
-
-        tbody.innerHTML += `
-            <tr class="fila-venta-cabecera" onclick="toggleDetalleVenta('${key}')">
-                <td>${time}</td>
-                <td>
-                    <span style="font-weight: 500;">${resumenProductos}</span>
-                    <span style="font-size: 0.8rem; color: var(--accent-primary); margin-left: 8px;">
-                        ${estaExpandido ? '▲ Ocultar' : '▼ Ver detalle'}
-                    </span>
-                </td>
-                <td><span class="badge ${badgeClass}">${metodoPago}</span></td>
-                <td style="font-weight: bold; color: var(--success);">$${v.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-                <td>
-                    <button class="btn btn-danger btn-icon-only" onclick="event.stopPropagation(); anularVentaEspecifica(${v.originalIndex})" title="Anular esta venta">🗑️</button>
-                </td>
-            </tr>
-        `;
-
-        if (estaExpandido) {
-            let filasProductos = '';
-            if (v.productos && v.productos.length > 0) {
-                v.productos.forEach(p => {
-                    const subtotal = p.precio * p.cantidad;
-                    filasProductos += `
-                        <li>
-                            <span>📦 <strong>${p.nombre}</strong> (x${p.cantidad})</span>
-                            <span>$${p.precio.toLocaleString('es-AR', { minimumFractionDigits: 2 })} c/u | Total: <strong>$${subtotal.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</strong></span>
-                        </li>
-                    `;
-                });
-            } else {
-                filasProductos = `<li><span>Venta sin desglose de productos individuales (Monto total: $${v.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })})</span></li>`;
-            }
-
-            tbody.innerHTML += `
-                <tr class="fila-detalle-productos">
-                    <td colspan="5">
-                        <ul class="lista-productos-vendidos">
-                            ${filasProductos}
-                        </ul>
-                    </td>
-                </tr>
-            `;
-        }
-    });
-}
-
-function toggleDetalleVenta(key) {
-    ventasDetalleExpandidas[key] = !ventasDetalleExpandidas[key];
-    dibujarTablaVentasDetalle();
-}
-
-let cierresExpandidos = {}; // Objeto para controlar qué cierres archivados están expandidos
-
-function toggleDetalleCierre(index) {
-    cierresExpandidos[index] = !cierresExpandidos[index];
-    actualizarTodo();
-}
-
-async function anularVentaEspecifica(index) {
-    const venta = ventas[index];
-    if (!venta) return;
-
-    let detalleVenta = "";
-    if (venta.productos && venta.productos.length > 0) {
-        detalleVenta = venta.productos.map(p => `${p.cantidad}x ${p.nombre}`).join('\n');
-    } else {
-        detalleVenta = venta.detalle || "Venta general";
-    }
-
-    if (confirm(`⚠️ ¿Confirmás la ANULACIÓN de esta venta?\n\n• Importe: $${venta.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}\n• Método: ${venta.metodo.toUpperCase()}\n• Hora: ${venta.fecha.split(', ')[1] || venta.fecha}\n\nProductos:\n${detalleVenta}\n\nSe devolverá el stock al inventario.`)) {
-        // Devolver stock si tiene productos
-        if (venta.productos) {
-            venta.productos.forEach(prod => {
-                const enDB = inventario.find(p => p.id === prod.id);
-                if (enDB && enDB.tipo !== "variable") {
-                    enDB.stock += prod.cantidad;
-                }
-            });
-            await apiPost('/api/inventario', inventario, 'inventario');
-            subirInventarioAGitHub();
-        }
-
-        // Remover de la lista
-        ventas.splice(index, 1);
-        await apiPost('/api/ventas', ventas, 'ventas_realizadas');
-        actualizarTodo();
-        beepSuccess();
-        alert("✅ Venta anulada exitosamente y stock retornado.");
-    }
-}
-
 
 function beepSuccess() {
     try {
@@ -749,7 +480,6 @@ function beepSuccess() {
 async function inicializarAdmin() {
     // Cargar todos los datos desde el servidor API
     inventario = await apiGet('/api/inventario', 'inventario');
-    fiados = await apiGet('/api/fiados', 'fiados');
     ventas = await apiGet('/api/ventas', 'ventas_realizadas');
     historialCierres = await apiGet('/api/historial-cierres', 'historial_cierres');
 
