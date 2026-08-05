@@ -28,17 +28,9 @@
     ]
   },
   {
-    "total": 18000,
+    "total": 0,
     "metodo": "efectivo",
-    "fecha": "5/8/2026, 17:19:04",
-    "productos": [
-      {
-        "id": "prod0006",
-        "nombre": "Asado con guarnición",
-        "precio": "18000",
-        "cantidad": 1,
-        "subtotal": 18000
-      }
-    ]
+    "fecha": "5/8/2026, 17:19:08",
+    "productos": []
   }
 ]
