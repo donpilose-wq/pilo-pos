@@ -95,5 +95,26 @@
         "subtotal": 32000
       }
     ]
+  },
+  {
+    "total": 39000,
+    "metodo": "efectivo",
+    "fecha": "5/8/2026, 17:49:15",
+    "productos": [
+      {
+        "id": "prod0047",
+        "nombre": "1/2 Pollo (solo)",
+        "precio": "23000",
+        "cantidad": 1,
+        "subtotal": 23000
+      },
+      {
+        "id": "prod0042",
+        "nombre": "Sandwich Bondiola con fritas",
+        "precio": "16000",
+        "cantidad": 1,
+        "subtotal": 16000
+      }
+    ]
   }
 ]
