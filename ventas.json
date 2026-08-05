@@ -179,5 +179,11 @@
         "subtotal": 52000
       }
     ]
+  },
+  {
+    "total": -50000,
+    "metodo": "efectivo",
+    "fecha": "5/8/2026, 18:14:51",
+    "detalle": "GASTO: CACO"
   }
 ]
