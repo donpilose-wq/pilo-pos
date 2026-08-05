@@ -32,5 +32,26 @@
     "metodo": "efectivo",
     "fecha": "5/8/2026, 17:19:08",
     "productos": []
+  },
+  {
+    "total": 23000,
+    "metodo": "efectivo",
+    "fecha": "5/8/2026, 17:32:06",
+    "productos": [
+      {
+        "id": "prod0054",
+        "nombre": "Torreja de Acelga",
+        "precio": "5000",
+        "cantidad": 1,
+        "subtotal": 5000
+      },
+      {
+        "id": "prod0007",
+        "nombre": "Vacío con guarnición",
+        "precio": "18000",
+        "cantidad": 1,
+        "subtotal": 18000
+      }
+    ]
   }
 ]
