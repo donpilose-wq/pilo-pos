@@ -32,5 +32,11 @@
     "metodo": "efectivo",
     "fecha": "5/8/2026, 17:19:08",
     "productos": []
+  },
+  {
+    "total": -100,
+    "metodo": "efectivo",
+    "fecha": "5/8/2026, 17:20:06",
+    "detalle": "GASTO: luz"
   }
 ]
