@@ -53,5 +53,26 @@
         "subtotal": 18000
       }
     ]
+  },
+  {
+    "total": 52000,
+    "metodo": "qr",
+    "fecha": "5/8/2026, 17:44:09",
+    "productos": [
+      {
+        "id": "prod0001",
+        "nombre": "Ravioles",
+        "precio": "16000",
+        "cantidad": 1,
+        "subtotal": 16000
+      },
+      {
+        "id": "prod0020",
+        "nombre": "Tortilla de papa",
+        "precio": "9000",
+        "cantidad": 4,
+        "subtotal": 36000
+      }
+    ]
   }
 ]
