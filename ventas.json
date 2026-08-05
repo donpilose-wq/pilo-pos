@@ -158,5 +158,26 @@
         "subtotal": 32000
       }
     ]
+  },
+  {
+    "total": 104000,
+    "metodo": "debito",
+    "fecha": "5/8/2026, 18:08:03",
+    "productos": [
+      {
+        "id": "prod0044",
+        "nombre": "Asado por kilo",
+        "precio": "52000",
+        "cantidad": 1,
+        "subtotal": 52000
+      },
+      {
+        "id": "prod0056",
+        "nombre": "Bondiola",
+        "precio": "52000",
+        "cantidad": 1,
+        "subtotal": 52000
+      }
+    ]
   }
 ]
