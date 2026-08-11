@@ -19,5 +19,11 @@
         "subtotal": 52000
       }
     ]
+  },
+  {
+    "total": -50000,
+    "metodo": "efectivo",
+    "fecha": "11/8/2026, 14:05:28",
+    "detalle": "GASTO: luz"
   }
 ]
