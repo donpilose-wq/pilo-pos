@@ -12,5 +12,19 @@
         "subtotal": 16000
       }
     ]
+  },
+  {
+    "total": 46000,
+    "metodo": "efectivo",
+    "fecha": "25/8/2026, 14:21:30",
+    "productos": [
+      {
+        "id": "prod0047",
+        "nombre": "1/2 Pollo (solo)",
+        "precio": "23000",
+        "cantidad": 2,
+        "subtotal": 46000
+      }
+    ]
   }
 ]
