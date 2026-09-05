@@ -1,555 +1,656 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - Kiosco El Cholo</title>
-    <!-- Google Fonts: Outfit for titles, Inter for body -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- Librería para el escáner QR/cámara -->
-    <script src="https://unpkg.com/html5-qrcode"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Admin Carta - Tilo Café Aguero (Sincroniza precios ES/EN/PT)</title>
     <style>
-        :root {
-            --bg-primary: #0a0e17;
-            --bg-secondary: #131a26;
-            --bg-tertiary: #1b2537;
-            --text-primary: #f8fafc;
-            --text-secondary: #94a3b8;
-            --accent-primary: #6366f1; /* Indigo */
-            --accent-hover: #4f46e5;
-            --success: #10b981; /* Emerald */
-            --warning: #f59e0b; /* Amber */
-            --danger: #ef4444; /* Rose */
-            --danger-hover: #dc2626;
-            --border-color: #2e3c51;
-            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
         body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            margin: 0;
-            padding: 24px;
-            box-sizing: border-box;
-            min-height: 100vh;
+            font-family: Arial, Helvetica, sans-serif;
+            margin: 18px;
+            background: #f7f3f0;
+            color: #333
         }
 
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
+        h1 {
+            text-align: center;
+            color: #806250;
+            margin-bottom: 10px
         }
 
-        /* Títulos */
-        h2, h3, h4 {
-            font-family: 'Outfit', sans-serif;
-            margin: 0;
-            font-weight: 700;
-        }
-
-        h3 {
-            color: var(--warning);
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 8px;
-            margin-top: 15px;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Botón navegación */
-        .btn-nav {
-            align-self: flex-start;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            padding: 12px 20px;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            font-size: 0.95rem;
-            border-radius: 10px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: var(--transition);
-        }
-
-        .btn-nav:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--accent-primary);
-            color: var(--accent-primary);
-        }
-
-        /* Secciones principales en tarjetas */
-        .panel-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: var(--card-shadow);
-        }
-
-        /* Dashboard de dinero */
-        .grid-reporte {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-        }
-
-        .caja-resumen {
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-            padding: 18px;
-            border-left: 4px solid var(--accent-primary);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-
-        .caja-resumen p {
-            margin: 0;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-
-        .caja-resumen b {
-            display: block;
-            margin-top: 8px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.8rem;
-            color: var(--text-primary);
-            font-weight: 700;
-        }
-
-        .total-dia-card {
-            background: linear-gradient(135deg, var(--accent-primary) 0%, #4f46e5 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px;
+        .topRow {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-weight: 700;
-            font-size: 1.4rem;
-            margin-top: 16px;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.25);
-            font-family: 'Outfit', sans-serif;
+            margin-bottom: 10px;
+            gap: 10px
         }
 
-        .total-dia-card span {
-            font-size: 2rem;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .actions-container {
+        .controls {
             display: flex;
-            gap: 12px;
-            margin-top: 16px;
-            flex-wrap: wrap;
-        }
-
-        /* Alertas de Stock */
-        #alerta-reposicion {
-            background: rgba(239, 68, 68, 0.08);
-            border: 1px solid rgba(239, 68, 68, 0.25);
-            padding: 18px;
-            border-radius: 12px;
-            display: none;
-            margin-top: 10px;
-        }
-
-        #alerta-reposicion h4 {
-            color: var(--danger);
-            display: flex;
-            align-items: center;
             gap: 8px;
-            margin-bottom: 8px;
+            align-items: center
         }
 
-        #lista-reposicion {
-            margin: 0;
-            padding-left: 20px;
-            color: var(--text-primary);
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        /* Tablas responsivas */
-        .contenedor-tabla {
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
             width: 100%;
-            overflow-x: auto;
-            margin-top: 16px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
+            box-sizing: border-box
+        }
+
+        button {
+            background: #806250;
+            color: #fff;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer
+        }
+
+        button.secondary {
+            background: #5c8a50
+        }
+
+        button.danger {
+            background: #c0392b
+        }
+
+        form {
+            background: #fff;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: none
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            background: var(--bg-secondary);
-            font-size: 0.95rem;
-            text-align: left;
+            background: #fff
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            vertical-align: top
         }
 
         th {
-            background: var(--bg-tertiary);
-            color: var(--warning);
-            padding: 14px 16px;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 1px solid var(--border-color);
+            background: #806250;
+            color: #fff
         }
 
-        td {
-            padding: 14px 16px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-primary);
-            vertical-align: middle;
+        img.mini {
+            max-width: 60px;
+            border-radius: 6px
         }
 
-        tr:last-child td {
-            border-bottom: none;
+        #guardarTodos {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 1200;
+            padding: 10px 14px;
+            background: #a07b68;
+            color: #fff;
+            border-radius: 8px
         }
 
-        tr:hover td {
-            background: rgba(255,255,255,0.01);
+        .small {
+            font-size: 13px;
+            color: #666
         }
 
-        /* Formularios y controles */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        .form-row {
+        .rowActions {
             display: flex;
-            gap: 12px;
-            margin-top: 16px;
+            gap: 6px
         }
 
-        input, select {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            box-sizing: border-box;
-            outline: none;
-            transition: var(--transition);
+        .previewImg {
+            max-width: 120px;
+            margin-top: 8px;
+            border-radius: 6px
+        }
+
+        textarea#multiInput {
             width: 100%;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-        }
-
-        /* Botones */
-        .btn {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            padding: 12px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            font-size: 0.95rem;
-        }
-
-        .btn:active {
-            transform: scale(0.98);
-        }
-
-        .btn-primary {
-            background: var(--warning);
-            color: var(--bg-primary);
-        }
-
-        .btn-primary:hover {
-            background: #f59e0b;
-            box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
-        }
-
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #059669;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: var(--danger-hover);
-        }
-
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            background: var(--border-color);
-        }
-
-        .btn-scanner {
-            background: var(--accent-primary);
-            color: white;
-            padding: 0 16px;
-        }
-
-        .btn-scanner:hover {
-            background: var(--accent-hover);
-        }
-
-        .btn-icon-only {
             padding: 8px;
             border-radius: 6px;
-            font-size: 1rem;
+            border: 1px solid #ccc;
+            box-sizing: border-box
         }
 
-        .status-low {
-            color: var(--danger);
-            font-weight: 700;
-            animation: pulse-red 2s infinite;
+        .toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 2000;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: opacity .25s ease, transform .25s ease;
+            max-width: 360px;
         }
 
-        @keyframes pulse-red {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        /* Cámara scanner box */
-        #reader {
-            width: 100%;
-            max-width: 420px;
-            margin: 16px auto;
-            border-radius: 12px;
-            overflow: hidden;
-            display: none;
-            border: 2px solid var(--accent-primary);
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+        .toast.ok {
+            background: #2ecc71;
         }
 
-        .flex-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+        .toast.info {
+            background: #3498db;
         }
 
-        /* Configuración de Token Nube */
-        .token-section {
-            margin-top: 30px;
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            border-top: 1px solid var(--border-color);
-            padding-top: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .toast.err {
+            background: #e74c3c;
         }
 
-        .token-input-group {
-            display: flex;
-            gap: 10px;
-            max-width: 400px;
-            align-items: center;
-        }
+        @media(max-width:720px) {
+            .topRow {
+                flex-direction: column;
+                align-items: flex-start
+            }
 
-        .token-input-group input {
-            padding: 8px 12px;
-            font-size: 0.85rem;
-        }
-
-        #token-status {
-            font-weight: 700;
-            font-size: 1rem;
+            table {
+                font-size: 13px
+            }
         }
     </style>
 </head>
+
 <body>
-
-<div class="container">
-    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <button class="btn-nav" onclick="window.location.href='index.html'">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m12 19-7-7 7-7"/>
-                <path d="M19 12H5"/>
-            </svg>
-            VOLVER AL MOSTRADOR
-        </button>
-        <button class="btn-nav" style="background: var(--warning); color: var(--bg-primary); border-color: var(--warning);" onclick="window.location.href='ventas.html'">
-            📋 VER REGISTROS DE VENTAS
-        </button>
-    </div>
-
-    <!-- 1. RESUMEN DE CAJA -->
-    <div class="panel-card">
-        <h3>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="1" x2="12" y2="23"/>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
-            CAJA Y CIERRE DEL DÍA
-        </h3>
-        
-        <div class="grid-reporte">
-            <div class="caja-resumen" style="border-left-color: var(--success);">
-                <p>💵 Efectivo Neto</p>
-                <b id="total-efectivo">$0,00</b>
+    <h1>Admin Carta — Tilo Café Aguero</h1>
+    <div class="topRow">
+        <div style="flex:1">
+            <div style="margin-bottom:6px"><span class="small">Repositorio:</span> <b> tilo-restocafe / cartaaguero</b>
             </div>
-            <div class="caja-resumen" style="border-left-color: var(--accent-primary);">
-                <p>💳 Tarjeta / Crédito</p>
-                <b id="total-debito">$0,00</b>
-            </div>
-            <div class="caja-resumen" style="border-left-color: var(--warning);">
-                <p>📱 Mercado Pago / QR</p>
-                <b id="total-qr">$0,00</b>
+            <div style="display:flex;gap:8px;align-items:center">
+                <label style="min-width:40px">Token:</label>
+                <input type="password" id="token" placeholder="Pegar token de GitHub (repo contents)"
+                    style="max-width:340px">
+                <button onclick="saveToken()">Guardar</button>
+                <button onclick="clearToken()">Borrar</button>
+                <button style="background:#888;padding:6px 8px;border-radius:6px;margin-left:6px"
+                    onclick="toggleTokenVisibility()">👁</button>
+                <span class="small" id="tokenStatus" style="margin-left:8px">No guardado</span>
             </div>
         </div>
 
-        <div class="total-dia-card">
-            <div>TOTAL ACUMULADO EN CAJA:</div>
-            <span id="total-general">$0,00</span>
-        </div>
-        
-        <div class="actions-container">
-            <button class="btn btn-success" style="flex: 1; min-width: 250px;" onclick="borrarVentas()">
-                🏁 CERRAR CAJA Y ARCHIVAR DÍA
-            </button>
-            <button class="btn btn-danger" style="flex: 1; min-width: 250px;" onclick="anularUltimaVentaAdmin()">
-                ↩️ ANULAR ÚLTIMO MOVIMIENTO DE CAJA
-            </button>
+        <div class="controls">
+            <input id="search" placeholder="Buscar..." oninput="filterProducts()"
+                style="min-width:180px;max-width:360px">
+            <button id="toggleFormBtn" onclick="toggleForm()">+ Agregar producto</button>
+            <button class="secondary" onclick="irWhatsApp()">📲 Ayuda por WhatsApp</button>
         </div>
     </div>
 
-    <!-- 2. REGISTRAR PAGO/GASTO -->
-    <div class="panel-card">
-        <h3>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="8" y1="12" x2="16" y2="12"/>
-            </svg>
-            REGISTRAR SALIDA DE DINERO (GASTO / PROVEEDOR)
-        </h3>
-        <div class="form-row" style="flex-wrap: wrap;">
-            <select id="gasto-tipo" onchange="toggleTipoGasto()" style="max-width: 250px; flex-shrink: 0;">
-                <option value="general">💸 Gasto General / Servicio / Proveedor</option>
-                <option value="adelanto">👤 Adelanto de Sueldo (Empleado)</option>
-            </select>
-            <input type="text" id="gasto-detalle" placeholder="Detalle del gasto (Ej: Panadería, Coca-cola, Gas, Luz)">
-            <input type="number" id="gasto-monto" placeholder="Monto $" style="max-width: 180px;">
-            <button class="btn btn-danger" onclick="registrarGasto()" style="font-size: 1.3rem; padding: 0 24px;">−</button>
-        </div>
+    <button id="guardarTodos" onclick="guardarTodosLosPrecios()">💾 Guardar TODOS los cambios</button>
 
-        <div class="contenedor-tabla">
-            <table id="tabla-gastos-detalle">
-                <thead>
-                    <tr>
-                        <th>Hora</th>
-                        <th>Concepto / Proveedor</th>
-                        <th>Monto</th>
-                        <th style="width: 80px;">Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpo-gastos"></tbody>
-            </table>
-        </div>
-        <button class="btn btn-secondary" style="margin-top: 12px; width: 100%;" onclick="limpiarSoloGastos()">
-            🗑️ Limpiar Visualmente la Lista de Pagos
-        </button>
-    </div>
-
-    <!-- SECCIÓN INVENTARIO MOVIDA A OTRA PÁGINA (inventario.html) -->
-
-
-
-    <!-- 6. HISTORIAL DE CIERRES -->
-    <div class="panel-card">
-        <h3>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            HISTORIAL DE CIERRES DE CAJA ARCHIVADOS
-        </h3>
-        <div class="contenedor-tabla">
-            <table id="tabla-historial">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Efectivo Neto</th>
-                        <th>Otros Medios</th>
-                        <th>Total Caja</th>
-                        <th style="width: 80px;">Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpo-historial"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- 7. CONFIGURACIÓN NUBE -->
-    <div class="panel-card token-section">
-        <div>
-            <h4 style="color: var(--text-primary);">☁️ Sincronización con GitHub (Base de Datos en la Nube)</h4>
-            <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 0.85rem;">
-                Configurá tu usuario, repositorio y Token de Acceso Personal (PAT) de GitHub. Al estar conectado, toda la información de ventas, productos, vales y cierres se guardará automáticamente como archivos JSON en tu repositorio de GitHub, permitiéndote usar la aplicación en múltiples dispositivos en tiempo real.
-            </p>
-        </div>
-        <div class="token-input-group" style="display: flex; flex-direction: column; gap: 14px; max-width: 550px; width: 100%;">
-            <div style="display: flex; gap: 12px; width: 100%;">
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 0.75rem;">Usuario de GitHub</label>
-                    <input type="text" id="gh-username" oninput="guardarConfiguracionGitHub()" placeholder="Ej: donpilose-wq">
-                </div>
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 0.75rem;">Nombre del Repositorio</label>
-                    <input type="text" id="gh-repo" oninput="guardarConfiguracionGitHub()" placeholder="Ej: pilo-pos">
-                </div>
+    <!-- Formulario simple -->
+    <form id="form">
+        <input type="hidden" id="editId">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div>
+                <label>Nombre</label>
+                <input id="nombre" type="text">
             </div>
-            <div style="display: flex; gap: 12px; align-items: flex-end; width: 100%;">
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 0.75rem;">Token de Acceso Personal (PAT)</label>
-                    <input type="password" id="gh-token" oninput="guardarConfiguracionGitHub()" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-                </div>
-                <div style="padding-bottom: 6px; flex-shrink: 0; min-width: 120px; text-align: center;">
-                    <span id="token-status" title="Estado de la Conexión">...</span>
-                </div>
+            <div>
+                <label>Precio</label>
+                <input id="precio" type="text" placeholder="Ej: 3400 (sin $)">
+            </div>
+
+            <div style="grid-column:1/3">
+                <label>Descripción</label>
+                <textarea id="descripcion" rows="3"></textarea>
+            </div>
+
+            <div>
+                <label>Imagen (ruta o URL)</label>
+                <input id="imagen" type="text" oninput="previewImage()">
+                <img id="preview" class="previewImg" style="display:none">
+            </div>
+
+            <div>
+                <label>Categoría</label>
+                <input id="categoria" type="text" placeholder="Ej: Cafetería">
             </div>
         </div>
-    </div>
-</div>
 
-<script src="admin.js"></script>
+        <div style="margin-top:10px;display:flex;gap:8px">
+            <button type="button" onclick="guardarFormulario()">Guardar</button>
+            <button type="button" onclick="cancelForm()" style="background:#999">Cancelar</button>
+        </div>
+    </form>
+
+    <table aria-label="Productos">
+        <thead>
+            <tr>
+                <th style="width:80px">Imagen</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th style="width:100px">Precio (ES)</th>
+                <th style="width:180px">Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+    </table>
+
+    <script>
+        /**********************************************************
+         * Config + estado
+         **********************************************************/
+        const USERNAME = "donpilose-wq";
+        const REPO = "menuclick";
+        const BRANCH = "main";
+        const MAIN_JSON = "productos.json";
+        const EN_JSON = "productos-en.json";
+        const PT_JSON = "productos-port.json";
+        let productos = []; // esta es la fuente de verdad
+        let filteredIds = null; // si hay filtro, guardamos ids ordenados para acciones por fila
+
+        /**********************************************************
+         * Toast
+         **********************************************************/
+        function showToast(msg, variant = 'ok', timeout = 3000) {
+            const div = document.createElement('div');
+            div.className = 'toast ' + (variant === 'info' ? 'info' : variant === 'err' ? 'err' : 'ok');
+            div.innerText = (variant === 'err' ? '✖︎ ' : variant === 'info' ? 'ℹ︎ ' : '✔︎ ') + msg;
+            document.body.appendChild(div);
+            requestAnimationFrame(() => div.classList.add('show'));
+            setTimeout(() => { div.classList.remove('show'); setTimeout(() => div.remove(), 300); }, timeout);
+        }
+
+        /**********************************************************
+         * Token (guardado en localStorage, botón de ver/ocultar)
+         **********************************************************/
+        function saveToken() { const t = document.getElementById('token').value.trim(); if (!t) { showToast('Pegá tu token primero', 'err'); return; } localStorage.setItem('github_token', t); document.getElementById('tokenStatus').innerText = 'Token guardado'; showToast('Token guardado', 'ok', 1800); }
+        function clearToken() { localStorage.removeItem('github_token'); document.getElementById('token').value = ''; document.getElementById('tokenStatus').innerText = 'Token borrado'; showToast('Token borrado', 'info', 1500); }
+        function getToken() { return localStorage.getItem('github_token'); }
+        function toggleTokenVisibility() { const inp = document.getElementById('token'); inp.type = inp.type === 'password' ? 'text' : 'password'; }
+        (function initTokenStatus() { const t = getToken(); if (t) { document.getElementById('tokenStatus').innerText = 'Token guardado'; document.getElementById('token').value = t; /* opcional: mostrar token en input */ } })();
+
+        /**********************************************************
+         * IDs y util
+         **********************************************************/
+        function extractNumberFromProdId(id) { if (!id) return null; const m = String(id).match(/(\d+)\s*$/); if (m) return parseInt(m[1], 10); return null; }
+        function generateNextProdId() { let max = 0; for (const p of productos) { const n = extractNumberFromProdId(p.id || ''); if (Number.isFinite(n) && n > max) max = n; } const next = max + 1; return 'prod' + String(next).padStart(4, '0'); }
+        function sanitizePrice(v) { if (v === undefined || v === null) return ''; const only = String(v).replace(/[^\d]/g, ''); return only || ''; }
+
+        /**********************************************************
+         * Ordenar campos por idioma (ES id al final, EN id primero, PT id al final)
+         **********************************************************/
+        function ordenarCamposPorIdioma(item, idioma) {
+            const id = item.id || '';
+            if (idioma === 'EN') {
+                return { id: id, name: item.name || item.nombre || item.nome || '', description: item.description || item.descripcion || item.descricao || '', price: item.price || item.precio || item.preco || '', image: item.image || item.imagen || item.imagem || '', category: item.category || item.categoria || '' };
+            }
+            if (idioma === 'PT') {
+                return { nome: item.nome || item.name || item.nombre || '', descricao: item.descricao || item.description || item.descripcion || '', preco: item.preco || item.price || item.precio || '', imagem: item.imagem || item.image || item.imagen || '', categoria: item.categoria || item.category || '', id: id };
+            }
+            return { nombre: item.nombre || item.name || item.nome || '', descripcion: item.descripcion || item.description || item.descricao || '', precio: item.precio || item.price || item.preco || '', imagen: item.imagen || item.image || item.imagem || '', categoria: item.categoria || item.category || '', id: id };
+        }
+
+        /**********************************************************
+         * Cargar productos.json (desde raw.githubusercontent)
+         **********************************************************/
+        async function loadProducts() {
+            try {
+                const r = await fetch(`https://raw.githubusercontent.com/${USERNAME}/${REPO}/${BRANCH}/${MAIN_JSON}`);
+                if (!r.ok) throw new Error(`No se pudo cargar ${MAIN_JSON} (${r.status})`);
+                const arr = await r.json();
+                if (!Array.isArray(arr)) throw new Error('Formato inválido en productos.json');
+
+                productos = arr.map(item => ({
+                    id: item.id || '',
+                    nombre: item.nombre || item.name || item.nome || '',
+                    descripcion: item.descripcion || item.description || item.descricao || '',
+                    precio: String(item.precio || item.price || item.preco || ''),
+                    imagen: item.imagen || item.image || item.imagem || '',
+                    categoria: item.categoria || item.category || ''
+                }));
+
+                let changed = false;
+                productos.forEach(p => { if (!p.id || !/^prod\d{4}$/.test(p.id)) { p.id = generateNextProdId(); changed = true; } });
+                render(productos);
+                if (changed) showToast('Se asignaron IDs faltantes (prodXXXX)', 'info', 2500);
+
+            } catch (e) {
+                console.warn(e);
+                productos = [];
+                render(productos);
+                showToast("No se pudo cargar productos.json", 'err', 5000);
+            }
+        }
+
+        /**********************************************************
+         * Render tabla (usar data-id por fila para evitar confundir índices)
+         **********************************************************/
+        function render(lista) {
+            const tb = document.getElementById('tbody');
+            tb.innerHTML = '';
+
+            // cuando se renderiza, guardamos la lista de ids visibles (para acciones desde la fila)
+            filteredIds = lista.map(p => p.id);
+
+            lista.forEach((p, i) => {
+                const tr = document.createElement('tr');
+                tr.dataset.rowId = p.id || '';
+
+                // imagen
+                const tdImg = document.createElement('td');
+                const img = document.createElement('img');
+                img.className = 'mini';
+                img.src = p.imagen || '';
+                img.onerror = () => { img.style.display = 'none'; };
+                tdImg.appendChild(img);
+                tr.appendChild(tdImg);
+
+                // nombre
+                const tdNombre = document.createElement('td');
+                const nombreInput = document.createElement('input');
+                nombreInput.type = 'text';
+                nombreInput.value = p.nombre || '';
+                nombreInput.oninput = e => {
+                    const idx = findIndexById(p.id);
+                    if (idx !== -1) productos[idx].nombre = e.target.value;
+                };
+                tdNombre.appendChild(nombreInput);
+                tr.appendChild(tdNombre);
+
+                // descripcion
+                const tdDesc = document.createElement('td');
+                const desc = document.createElement('textarea');
+                desc.rows = 2;
+                desc.value = p.descripcion || '';
+                desc.oninput = e => { const idx = findIndexById(p.id); if (idx !== -1) productos[idx].descripcion = e.target.value; };
+                tdDesc.appendChild(desc);
+                tr.appendChild(tdDesc);
+
+                // categoria
+                const tdCat = document.createElement('td');
+                const cat = document.createElement('input');
+                cat.type = 'text';
+                cat.value = p.categoria || '';
+                cat.oninput = e => { const idx = findIndexById(p.id); if (idx !== -1) productos[idx].categoria = e.target.value; };
+                tdCat.appendChild(cat);
+                tr.appendChild(tdCat);
+
+                // precio
+                const tdPrecio = document.createElement('td');
+                const precio = document.createElement('input');
+                precio.type = 'text';
+                precio.value = p.precio || '';
+                precio.oninput = e => { const idx = findIndexById(p.id); if (idx !== -1) productos[idx].precio = e.target.value; };
+                tdPrecio.appendChild(precio);
+                tr.appendChild(tdPrecio);
+
+                // acciones
+                const tdAcc = document.createElement('td');
+                tdAcc.className = 'rowActions';
+
+                const b1 = document.createElement('button');
+                b1.textContent = "Guardar";
+                b1.onclick = () => guardarFilaPorId(p.id);
+
+                const b2 = document.createElement('button');
+                b2.textContent = "Editar";
+                b2.style.background = "#2d87d6";
+                b2.onclick = () => loadIntoFormById(p.id);
+
+                const b3 = document.createElement('button');
+                b3.textContent = "Eliminar";
+                b3.className = "danger";
+                b3.onclick = () => eliminarProductoPorId(p.id);
+
+                tdAcc.appendChild(b1);
+                tdAcc.appendChild(b2);
+                tdAcc.appendChild(b3);
+
+                tr.appendChild(tdAcc);
+                tb.appendChild(tr);
+            });
+        }
+
+        function findIndexById(id) { return productos.findIndex(x => x.id === id); }
+
+        /**********************************************************
+         * Form helpers (ahora cargan por ID y scrollean al form)
+         **********************************************************/
+        function toggleForm() { const f = document.getElementById('form'); f.style.display = f.style.display === 'none' || f.style.display === '' ? 'block' : 'none'; if (f.style.display === 'block') f.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        function cancelForm() { document.getElementById('editId').value = ''; document.getElementById('nombre').value = ''; document.getElementById('descripcion').value = ''; document.getElementById('precio').value = ''; document.getElementById('imagen').value = ''; document.getElementById('categoria').value = ''; document.getElementById('preview').style.display = 'none'; document.getElementById('form').style.display = 'none'; }
+        function previewImage() { const v = document.getElementById('imagen').value.trim(); const img = document.getElementById('preview'); if (!v) { img.style.display = 'none'; img.src = ''; return; } img.src = v; img.style.display = 'block'; img.onerror = () => { img.style.display = 'none'; }; }
+        function loadIntoFormById(id) { const idx = findIndexById(id); if (idx === -1) { showToast('Producto no encontrado para editar', 'err'); return; } const p = productos[idx]; document.getElementById('editId').value = p.id; document.getElementById('nombre').value = p.nombre || ''; document.getElementById('descripcion').value = p.descripcion || ''; document.getElementById('precio').value = p.precio || ''; document.getElementById('imagen').value = p.imagen || ''; document.getElementById('categoria').value = p.categoria || ''; previewImage(); const f = document.getElementById('form'); f.style.display = 'block'; f.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+        function validarProductoObj(obj) { if (!obj.nombre) return "Falta nombre"; if (!obj.precio) return "Falta precio"; return null; }
+        function guardarFormulario() {
+            const nombre = document.getElementById('nombre').value.trim(); const descripcion = document.getElementById('descripcion').value.trim(); const precio = sanitizePrice(document.getElementById('precio').value.trim()); const imagen = document.getElementById('imagen').value.trim(); const categoria = document.getElementById('categoria').value.trim(); const editId = document.getElementById('editId').value; const obj = { nombre, descripcion, precio, imagen, categoria }; const err = validarProductoObj(obj); if (err) { showToast(err, 'err'); return; } if (editId) {
+                const idx = findIndexById(editId); if (idx !== -1) { productos[idx] = { ...productos[idx], ...obj }; if (!productos[idx].id || !/^prod\d{4}$/.test(productos[idx].id)) productos[idx].id = generateNextProdId(); } else { showToast('ID de edición no encontrado', 'err'); }
+            } else { const id = generateNextProdId(); productos.push({ id, ...obj }); }
+            render(productos);
+            document.getElementById('form').style.display = 'none';
+            showToast('Producto agregado/actualizado localmente', 'ok', 1800);
+        }
+        function procesarMulti() { const raw = document.getElementById('multiInput').value.trim(); if (!raw) { showToast('Nada para procesar', 'err'); return; } const lines = raw.split('\n').map(l => l.trim()).filter(Boolean); for (const ln of lines) { const parts = ln.split('|').map(p => p.trim()); const nombre = parts[0] || 'Sin nombre'; const descripcion = parts[1] || ''; const precio = sanitizePrice(parts[2] || ''); const imagen = parts[3] || ''; const categoria = parts[4] || ''; const id = generateNextProdId(); productos.push({ id, nombre, descripcion, precio, imagen, categoria }); } document.getElementById('multiInput').value = ''; render(productos); showToast('Productos agregados localmente. Presioná "Guardar TODOS los cambios".', 'info', 3500); }
+
+        function eliminarProductoPorId(id) { if (!confirm('Eliminar producto?')) return; const idx = findIndexById(id); if (idx !== -1) { productos.splice(idx, 1); render(productos); showToast('Producto eliminado localmente', 'info', 1600); } else { showToast('Producto no encontrado', 'err'); } }
+
+        /**********************************************************
+         * Refrescar array desde la tabla (importante antes de "Guardar TODOS")
+         * Ahora se usa data-row-id para mapear
+         **********************************************************/
+        function refrescarArrayDesdeTabla() {
+            const filas = document.querySelectorAll("#tbody tr");
+            const nuevos = [];
+            filas.forEach((fila) => {
+                const id = fila.dataset.rowId || generateNextProdId();
+                const celdas = fila.querySelectorAll("td");
+                const nombre = celdas[1].querySelector("input").value.trim();
+                const descripcion = celdas[2].querySelector("textarea").value.trim();
+                const categoria = celdas[3].querySelector("input").value.trim();
+                const precio = sanitizePrice(celdas[4].querySelector("input").value.trim());
+                const productoExistente = productos.find(p => p.id === id) || {};
+                const imagen = productoExistente.imagen || '';
+                nuevos.push({ id, nombre, descripcion, categoria, precio, imagen });
+            });
+            productos = nuevos;
+        }
+
+        /**********************************************************
+         * GitHub helpers
+         **********************************************************/
+        async function githubGetFileInfo(path) {
+            const token = getToken();
+            const headers = token ? { Authorization: 'token ' + token, 'Accept': 'application/vnd.github.v3+json' } : { 'Accept': 'application/vnd.github.v3+json' };
+            const url = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${path}?ref=${BRANCH}`;
+            const res = await fetch(url, { headers });
+            if (!res.ok) {
+                const txt = await res.text().catch(() => '');
+                throw new Error(`GitHub get ${path} -> ${res.status} ${txt}`);
+            }
+            return await res.json();
+        }
+
+        async function githubPutFile(path, contentString, message, sha) {
+            const token = getToken();
+            if (!token) throw new Error('Token requerido para subir cambios a GitHub');
+
+            const url = `https://api.github.com/repos/${USERNAME}/${REPO}/contents/${path}`;
+            const body = { message, content: btoa(unescape(encodeURIComponent(contentString))), branch: BRANCH };
+            if (sha) body.sha = sha;
+
+            const res = await fetch(url, {
+                method: 'PUT',
+                headers: { Authorization: 'token ' + token, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' },
+                body: JSON.stringify(body)
+            });
+
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(`GitHub PUT ${path} -> ${res.status}: ${data.message || JSON.stringify(data)}`);
+            }
+            return data;
+        }
+
+        /**********************************************************
+         * Guardar productos.json (PARCHE: pedir SHA FRESCO justo antes de PUT)
+         **********************************************************/
+        async function saveMainJson(arr, commitMessage) {
+            const out = arr.map(item => ordenarCamposPorIdioma(item, 'ES'));
+            const contentString = JSON.stringify(out, null, 2);
+
+            let shaActual;
+            try { const info = await githubGetFileInfo(MAIN_JSON); shaActual = info.sha; } catch (e) { shaActual = undefined; }
+
+            try { const info2 = await githubGetFileInfo(MAIN_JSON); shaActual = info2.sha; } catch (e) { }
+
+            await githubPutFile(MAIN_JSON, contentString, commitMessage, shaActual);
+        }
+
+        /**********************************************************
+         * Sincronizar precios en EN y PT (PARCHE: pedir SHA fresco ANTES de PUT)
+         **********************************************************/
+        async function syncPricesToLangs() {
+            const token = getToken();
+            if (!token) { showToast('Token requerido para sincronizar EN/PT', 'err', 4000); return; }
+
+            const byId = {};
+            productos.forEach(p => { if (p.id) byId[p.id] = p; });
+
+            async function processLangFile(filename, idioma) {
+                let info;
+                try { info = await githubGetFileInfo(filename); } catch (e) { info = null; }
+
+                let arr = [];
+                if (info && info.content) {
+                    const raw = info.content.replace(/\n/g, '');
+                    const decoded = decodeURIComponent(escape(window.atob(raw)));
+                    try { arr = JSON.parse(decoded); if (!Array.isArray(arr)) arr = []; } catch (e) { arr = []; }
+                }
+
+                let changed = false;
+
+                const newArr = arr.map(item => {
+                    const itemId = item.id || null;
+                    if (itemId && byId[itemId]) {
+                        const nuevo = sanitizePrice(byId[itemId].precio);
+                        if ('precio' in item && String(item.precio) !== nuevo) { item.precio = nuevo; changed = true; }
+                        if ('price' in item && String(item.price) !== nuevo) { item.price = nuevo; changed = true; }
+                        if ('preco' in item && String(item.preco) !== nuevo) { item.preco = nuevo; changed = true; }
+                    }
+                    if (!item.id && itemId) item.id = itemId;
+                    return ordenarCamposPorIdioma(item, idioma);
+                });
+
+                if (info === null) {
+                    const created = [];
+                    for (const pid in byId) { const p = byId[pid]; if (!p) continue; const obj = ordenarCamposPorIdioma({ id: p.id, nombre: p.nombre, descripcion: p.descripcion, precio: p.precio, imagen: p.imagen, categoria: p.categoria }, idioma); created.push(obj); }
+                    const contentStringCreate = JSON.stringify(created, null, 2);
+                    await githubPutFile(filename, contentStringCreate, `Crea ${filename} desde productos.json`, undefined);
+                    return;
+                }
+
+                if (changed) { const latestInfo = await githubGetFileInfo(filename); const latestSha = latestInfo.sha; const contentString = JSON.stringify(newArr, null, 2); await githubPutFile(filename, contentString, `Sincroniza precios desde productos.json`, latestSha); }
+            }
+
+            await processLangFile(EN_JSON, 'EN');
+            await processLangFile(PT_JSON, 'PT');
+        }
+
+        /**********************************************************
+         * Guardar fila por ID (usa saveMainJson + syncPricesToLangs)
+         **********************************************************/
+        async function guardarFilaPorId(id) {
+            try {
+                const idx = findIndexById(id);
+                if (idx === -1) throw new Error('Producto no encontrado');
+                const p = productos[idx];
+                if (!p.id || !/^prod\d{4}$/.test(p.id)) p.id = generateNextProdId();
+                p.precio = sanitizePrice(p.precio);
+
+                await saveMainJson(productos, `Actualiza producto ${p.id} - precio ${p.precio}`);
+                await syncPricesToLangs();
+
+                showToast('Producto guardado y precios sincronizados en EN/PT', 'ok', 2600);
+                render(productos);
+            } catch (e) { console.error(e); showToast('Error al guardar fila: ' + (e.message || e), 'err', 5000); }
+        }
+
+        /**********************************************************
+         * Guardar TODOS - refresca tabla y usa saveMainJson parcheado
+         **********************************************************/
+        async function guardarTodosLosPrecios() {
+            try {
+                // NO reconstruir productos desde la tabla
+                productos = productos.map(p => ({
+                    ...p,
+                    precio: sanitizePrice(p.precio)
+                }));
+
+                await saveMainJson(productos, `Guardar TODOS los productos - sincronizando precios a EN/PT`);
+                await syncPricesToLangs();
+
+                showToast('Todos los cambios guardados y sincronizados (ES/EN/PT)', 'ok', 3000);
+                render(productos);
+
+            } catch (e) {
+                console.error(e);
+                showToast('Error al guardar todos: ' + (e.message || e), 'err', 6000);
+            }
+        }
+
+        /**********************************************************
+         * Filtrado (no rompe indices: actions usan ids)
+         **********************************************************/
+        function normalizarTexto(texto) {
+            if (!texto) return '';
+            return String(texto)
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "");
+        }
+
+        function filterProducts() {
+            const q = document.getElementById('search').value.trim();
+            if (!q) { render(productos); return; }
+            const qNorm = normalizarTexto(q);
+            const filtered = productos.filter(p =>
+                normalizarTexto(p.nombre).includes(qNorm) ||
+                normalizarTexto(p.descripcion).includes(qNorm) ||
+                normalizarTexto(p.categoria).includes(qNorm)
+            );
+            render(filtered);
+        }
+        function irWhatsApp() {
+            const numero = "5491123140119"; // ← poné tu número real
+            const mensaje = encodeURIComponent(
+                "Hola, necesito ayuda con el admin de la carta digital"
+            );
+            window.open(`https://wa.me/${numero}?text=${mensaje}`, "_blank");
+        }
+
+        /**********************************************************
+         * Init
+         **********************************************************/
+        document.addEventListener('DOMContentLoaded', () => { loadProducts(); });
+    </script>
+
 </body>
+
+</html>
+</body>
+
 </html>
