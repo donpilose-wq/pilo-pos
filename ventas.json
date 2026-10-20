@@ -1,1 +1,36 @@
-[]
+[
+  {
+    "id": "TCK-795921",
+    "total": 50000,
+    "metodo": "qr",
+    "pagaCon": 50000,
+    "vuelto": 0,
+    "fecha": "20/10/2026, 08:09:55",
+    "productos": [
+      {
+        "id": "prod0005",
+        "nombre": "1/4 dePollo con guarnición",
+        "precio": "16000",
+        "cantidad": 1,
+        "imagen": "img/ppolli.jpg",
+        "subtotal": 16000
+      },
+      {
+        "id": "prod0035",
+        "nombre": "Bomba de Papa",
+        "precio": "8000",
+        "cantidad": 1,
+        "imagen": "img/bombita.png",
+        "subtotal": 8000
+      },
+      {
+        "id": "prod0052",
+        "nombre": "Mila o Suprema ",
+        "precio": "13000",
+        "cantidad": 2,
+        "imagen": "img/milaconguarnicion.jpeg",
+        "subtotal": 26000
+      }
+    ]
+  }
+]
