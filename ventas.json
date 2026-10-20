@@ -42,5 +42,23 @@
         "subtotal": 72000
       }
     ]
+  },
+  {
+    "id": "TCK-505596",
+    "total": 25000,
+    "metodo": "efectivo",
+    "pagaCon": 25000,
+    "vuelto": 0,
+    "fecha": "20/10/2026, 06:58:25",
+    "productos": [
+      {
+        "id": "prod0047",
+        "nombre": "1/2 Pollo (solo)",
+        "precio": "25000",
+        "cantidad": 1,
+        "imagen": "img/pollogran.jpg",
+        "subtotal": 25000
+      }
+    ]
   }
 ]
