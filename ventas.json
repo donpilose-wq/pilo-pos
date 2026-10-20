@@ -132,5 +132,39 @@
         "subtotal": 25000
       }
     ]
+  },
+  {
+    "id": "TCK-469762",
+    "total": 84500,
+    "metodo": "efectivo",
+    "pagaCon": 84500,
+    "vuelto": 0,
+    "fecha": "20/10/2026, 07:14:29",
+    "productos": [
+      {
+        "id": "prod0044",
+        "nombre": "Asado por kilo",
+        "precio": "58000",
+        "cantidad": 1,
+        "imagen": "img/Captura de pantalla 2025-10-29 165103.png",
+        "subtotal": 58000
+      },
+      {
+        "id": "prod0010",
+        "nombre": "Milanesa con guarnición",
+        "precio": "17000",
+        "cantidad": 1,
+        "imagen": "img/milaconguarnicion.jpeg",
+        "subtotal": 17000
+      },
+      {
+        "id": "prod0017",
+        "nombre": "Tarta de pollo",
+        "precio": "9500",
+        "cantidad": 1,
+        "imagen": "img/tartapolo.png",
+        "subtotal": 9500
+      }
+    ]
   }
 ]
