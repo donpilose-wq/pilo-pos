@@ -74,5 +74,23 @@
     "metodo": "efectivo",
     "fecha": "20/10/2026, 20:50:06",
     "detalle": "GASTO: coca"
+  },
+  {
+    "id": "TCK-695288",
+    "total": 16000,
+    "metodo": "qr",
+    "pagaCon": 16000,
+    "vuelto": 0,
+    "fecha": "20/10/2026, 08:58:15",
+    "productos": [
+      {
+        "id": "prod0035",
+        "nombre": "Bomba de Papa",
+        "precio": "8000",
+        "cantidad": 2,
+        "imagen": "img/bombita.png",
+        "subtotal": 16000
+      }
+    ]
   }
 ]
