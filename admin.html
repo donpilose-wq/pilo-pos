@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administración - punto de venta</title>
+    <title>Panel de Administración - Kiosco El Cholo</title>
     <!-- Google Fonts: Outfit for titles, Inter for body -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <!-- Librería para el escáner QR/cámara -->
     <script src="https://unpkg.com/html5-qrcode"></script>
     <style>
@@ -17,11 +20,15 @@
             --bg-tertiary: #1b2537;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            --accent-primary: #6366f1; /* Indigo */
+            --accent-primary: #6366f1;
+            /* Indigo */
             --accent-hover: #4f46e5;
-            --success: #10b981; /* Emerald */
-            --warning: #f59e0b; /* Amber */
-            --danger: #ef4444; /* Rose */
+            --success: #10b981;
+            /* Emerald */
+            --warning: #f59e0b;
+            /* Amber */
+            --danger: #ef4444;
+            /* Rose */
             --danger-hover: #dc2626;
             --border-color: #2e3c51;
             --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
@@ -47,7 +54,9 @@
         }
 
         /* Títulos */
-        h2, h3, h4 {
+        h2,
+        h3,
+        h4 {
             font-family: 'Outfit', sans-serif;
             margin: 0;
             font-weight: 700;
@@ -110,7 +119,7 @@
             border-radius: 12px;
             padding: 18px;
             border-left: 4px solid var(--accent-primary);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
         .caja-resumen p {
@@ -148,7 +157,7 @@
 
         .total-dia-card span {
             font-size: 2rem;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
 
         .actions-container {
@@ -225,7 +234,7 @@
         }
 
         tr:hover td {
-            background: rgba(255,255,255,0.01);
+            background: rgba(255, 255, 255, 0.01);
         }
 
         /* Formularios y controles */
@@ -242,7 +251,8 @@
             margin-top: 16px;
         }
 
-        input, select {
+        input,
+        select {
             background: var(--bg-primary);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
@@ -255,7 +265,8 @@
             width: 100%;
         }
 
-        input:focus, select:focus {
+        input:focus,
+        select:focus {
             border-color: var(--accent-primary);
             box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
         }
@@ -341,9 +352,17 @@
         }
 
         @keyframes pulse-red {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.4;
+            }
+
+            100% {
+                opacity: 1;
+            }
         }
 
         /* Cámara scanner box */
@@ -456,181 +475,207 @@
         }
 
         @keyframes fadeInModal {
-            from { opacity: 0; transform: scale(0.96); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <button class="btn-nav" onclick="window.location.href='index.html'">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="m12 19-7-7 7-7"/>
-                <path d="M19 12H5"/>
-            </svg>
-            VOLVER AL MOSTRADOR
-        </button>
-        <button class="btn-nav" style="background: var(--warning); color: var(--bg-primary); border-color: var(--warning);" onclick="window.location.href='ventas.html'">
-            📋 VER REGISTROS DE VENTAS
-        </button>
-    </div>
-
-    <!-- 1. RESUMEN DE CAJA -->
-    <div class="panel-card">
-        <h3>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="12" y1="1" x2="12" y2="23"/>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-            </svg>
-            CAJA Y CIERRE DEL DÍA
-        </h3>
-        
-        <div class="grid-reporte">
-            <div class="caja-resumen" style="border-left-color: var(--success);">
-                <p>💵 Efectivo Neto</p>
-                <b id="total-efectivo">$0,00</b>
-            </div>
-            <div class="caja-resumen" style="border-left-color: var(--accent-primary);">
-                <p>💳 Tarjeta / Crédito</p>
-                <b id="total-debito">$0,00</b>
-            </div>
-            <div class="caja-resumen" style="border-left-color: var(--warning);">
-                <p>📱 Mercado Pago / QR</p>
-                <b id="total-qr">$0,00</b>
-            </div>
-        </div>
-
-        <div class="total-dia-card">
-            <div>TOTAL ACUMULADO EN CAJA:</div>
-            <span id="total-general">$0,00</span>
-        </div>
-        
-        <div class="actions-container">
-            <button class="btn btn-success" style="flex: 1; min-width: 250px;" onclick="borrarVentas()">
-                🏁 CERRAR CAJA Y ARCHIVAR DÍA
+    <div class="container">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <button class="btn-nav" onclick="window.location.href='index.html'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m12 19-7-7 7-7" />
+                    <path d="M19 12H5" />
+                </svg>
+                VOLVER AL MOSTRADOR
             </button>
-            <button class="btn btn-danger" style="flex: 1; min-width: 250px;" onclick="anularUltimaVentaAdmin()">
-                ↩️ ANULAR ÚLTIMO MOVIMIENTO DE CAJA
+            <button class="btn-nav"
+                style="background: var(--warning); color: var(--bg-primary); border-color: var(--warning);"
+                onclick="window.location.href='ventas.html'">
+                📋 VER REGISTROS DE VENTAS
             </button>
         </div>
-    </div>
 
-    <!-- 2. REGISTRAR PAGO/GASTO -->
-    <div class="panel-card">
-        <h3>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="8" y1="12" x2="16" y2="12"/>
-            </svg>
-            REGISTRAR SALIDA DE DINERO (GASTO / PROVEEDOR)
-        </h3>
-        <div class="form-row" style="flex-wrap: wrap;">
-            <select id="gasto-tipo" onchange="toggleTipoGasto()" style="max-width: 250px; flex-shrink: 0;">
-                <option value="general">💸 Gasto General / Servicio / Proveedor</option>
-                <option value="adelanto">👤 Adelanto de Sueldo (Empleado)</option>
-            </select>
-            <input type="text" id="gasto-detalle" placeholder="Detalle del gasto (Ej: Panadería, Coca-cola, Gas, Luz)">
-            <input type="number" id="gasto-monto" placeholder="Monto $" style="max-width: 180px;">
-            <button class="btn btn-danger" onclick="registrarGasto()" style="font-size: 1.3rem; padding: 0 24px;">−</button>
-        </div>
+        <!-- 1. RESUMEN DE CAJA -->
+        <div class="panel-card">
+            <h3>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="1" x2="12" y2="23" />
+                    <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+                CAJA Y CIERRE DEL DÍA
+            </h3>
 
-        <div class="contenedor-tabla">
-            <table id="tabla-gastos-detalle">
-                <thead>
-                    <tr>
-                        <th>Hora</th>
-                        <th>Concepto / Proveedor</th>
-                        <th>Monto</th>
-                        <th style="width: 80px;">Acción</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpo-gastos"></tbody>
-            </table>
-        </div>
-        <button class="btn btn-secondary" style="margin-top: 12px; width: 100%;" onclick="limpiarSoloGastos()">
-            🗑️ Limpiar Visualmente la Lista de Pagos
-        </button>
-    </div>
-
-    <!-- SECCIÓN INVENTARIO MOVIDA A OTRA PÁGINA (inventario.html) -->
-
-
-
-    <!-- 6. HISTORIAL DE CIERRES -->
-    <div class="panel-card">
-        <h3>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-                <line x1="16" y1="2" x2="16" y2="6"/>
-                <line x1="8" y1="2" x2="8" y2="6"/>
-                <line x1="3" y1="10" x2="21" y2="10"/>
-            </svg>
-            HISTORIAL DE CIERRES DE CAJA ARCHIVADOS
-        </h3>
-        <div class="contenedor-tabla">
-            <table id="tabla-historial">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Efectivo Neto</th>
-                        <th>Otros Medios</th>
-                        <th>Gastos / Vales</th>
-                        <th>Total Caja</th>
-                        <th style="width: 120px;">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody id="cuerpo-historial"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- 7. CONFIGURACIÓN NUBE -->
-    <div class="panel-card token-section">
-        <div>
-            <h4 style="color: var(--text-primary);">☁️ Sincronización con GitHub (Base de Datos en la Nube)</h4>
-            <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 0.85rem;">
-                Configurá tu usuario, repositorio y Token de Acceso Personal (PAT) de GitHub. Al estar conectado, toda la información de ventas, productos, vales y cierres se guardará automáticamente como archivos JSON en tu repositorio de GitHub, permitiéndote usar la aplicación en múltiples dispositivos en tiempo real.
-            </p>
-        </div>
-        <div class="token-input-group" style="display: flex; flex-direction: column; gap: 14px; max-width: 550px; width: 100%;">
-            <div style="display: flex; gap: 12px; width: 100%;">
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 0.75rem;">Usuario de GitHub</label>
-                    <input type="text" id="gh-username" oninput="guardarConfiguracionGitHub()" placeholder="Ej: donpilose-wq">
+            <div class="grid-reporte">
+                <div class="caja-resumen" style="border-left-color: var(--success);">
+                    <p>💵 Efectivo Neto</p>
+                    <b id="total-efectivo">$0,00</b>
                 </div>
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 0.75rem;">Nombre del Repositorio</label>
-                    <input type="text" id="gh-repo" oninput="guardarConfiguracionGitHub()" placeholder="Ej: pilo-pos">
+                <div class="caja-resumen" style="border-left-color: var(--accent-primary);">
+                    <p>💳 Tarjeta / Crédito</p>
+                    <b id="total-debito">$0,00</b>
+                </div>
+                <div class="caja-resumen" style="border-left-color: var(--warning);">
+                    <p>📱 Mercado Pago / QR</p>
+                    <b id="total-qr">$0,00</b>
                 </div>
             </div>
-            <div style="display: flex; gap: 12px; align-items: flex-end; width: 100%;">
-                <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
-                    <label style="font-size: 0.75rem;">Token de Acceso Personal (PAT)</label>
-                    <input type="password" id="gh-token" oninput="guardarConfiguracionGitHub()" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+
+            <div class="total-dia-card">
+                <div>TOTAL ACUMULADO EN CAJA:</div>
+                <span id="total-general">$0,00</span>
+            </div>
+
+            <div class="actions-container">
+                <button class="btn btn-success" style="flex: 1; min-width: 250px;" onclick="borrarVentas()">
+                    🏁 CERRAR CAJA Y ARCHIVAR DÍA
+                </button>
+                <button class="btn btn-danger" style="flex: 1; min-width: 250px;" onclick="anularUltimaVentaAdmin()">
+                    ↩️ ANULAR ÚLTIMO MOVIMIENTO DE CAJA
+                </button>
+            </div>
+        </div>
+
+        <!-- 2. REGISTRAR PAGO/GASTO -->
+        <div class="panel-card">
+            <h3>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="8" y1="12" x2="16" y2="12" />
+                </svg>
+                REGISTRAR SALIDA DE DINERO (GASTO / PROVEEDOR)
+            </h3>
+            <div class="form-row" style="flex-wrap: wrap;">
+                <select id="gasto-tipo" onchange="toggleTipoGasto()" style="max-width: 250px; flex-shrink: 0;">
+                    <option value="general">💸 Gasto General / Servicio / Proveedor</option>
+                    <option value="adelanto">👤 Adelanto de Sueldo (Empleado)</option>
+                </select>
+                <input type="text" id="gasto-detalle"
+                    placeholder="Detalle del gasto (Ej: Panadería, Coca-cola, Gas, Luz)">
+                <input type="number" id="gasto-monto" placeholder="Monto $" style="max-width: 180px;">
+                <button class="btn btn-danger" onclick="registrarGasto()"
+                    style="font-size: 1.3rem; padding: 0 24px;">−</button>
+            </div>
+
+            <div class="contenedor-tabla">
+                <table id="tabla-gastos-detalle">
+                    <thead>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Concepto / Proveedor</th>
+                            <th>Monto</th>
+                            <th style="width: 80px;">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpo-gastos"></tbody>
+                </table>
+            </div>
+            <button class="btn btn-secondary" style="margin-top: 12px; width: 100%;" onclick="limpiarSoloGastos()">
+                🗑️ Limpiar Visualmente la Lista de Pagos
+            </button>
+        </div>
+
+        <!-- SECCIÓN INVENTARIO MOVIDA A OTRA PÁGINA (inventario.html) -->
+
+
+
+        <!-- 6. HISTORIAL DE CIERRES -->
+        <div class="panel-card">
+            <h3>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                HISTORIAL DE CIERRES DE CAJA ARCHIVADOS
+            </h3>
+            <div class="contenedor-tabla">
+                <table id="tabla-historial">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Efectivo Neto</th>
+                            <th>Otros Medios</th>
+                            <th>Gastos / Vales</th>
+                            <th>Total Caja</th>
+                            <th style="width: 120px;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cuerpo-historial"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 7. CONFIGURACIÓN NUBE -->
+        <div class="panel-card token-section">
+            <div>
+                <h4 style="color: var(--text-primary);">☁️ Sincronización con GitHub (Base de Datos en la Nube)</h4>
+                <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 0.85rem;">
+                    Configurá tu usuario, repositorio y Token de Acceso Personal (PAT) de GitHub. Al estar conectado,
+                    toda la información de ventas, productos, vales y cierres se guardará automáticamente como archivos
+                    JSON en tu repositorio de GitHub, permitiéndote usar la aplicación en múltiples dispositivos en
+                    tiempo real.
+                </p>
+            </div>
+            <div class="token-input-group"
+                style="display: flex; flex-direction: column; gap: 14px; max-width: 550px; width: 100%;">
+                <div style="display: flex; gap: 12px; width: 100%;">
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.75rem;">Usuario de GitHub</label>
+                        <input type="text" id="gh-username" oninput="guardarConfiguracionGitHub()"
+                            placeholder="Ej: donpilose-wq">
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.75rem;">Nombre del Repositorio</label>
+                        <input type="text" id="gh-repo" oninput="guardarConfiguracionGitHub()"
+                            placeholder="Ej: pilo-pos">
+                    </div>
                 </div>
-                <div style="padding-bottom: 6px; flex-shrink: 0; min-width: 120px; text-align: center;">
-                    <span id="token-status" title="Estado de la Conexión">...</span>
+                <div style="display: flex; gap: 12px; align-items: flex-end; width: 100%;">
+                    <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                        <label style="font-size: 0.75rem;">Token de Acceso Personal (PAT)</label>
+                        <input type="password" id="gh-token" oninput="guardarConfiguracionGitHub()"
+                            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                    </div>
+                    <div style="padding-bottom: 6px; flex-shrink: 0; min-width: 120px; text-align: center;">
+                        <span id="token-status" title="Estado de la Conexión">...</span>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- MODAL DETALLE DE CIERRE -->
-<div id="modal-detalle-overlay" style="display: none;">
-    <div id="modal-detalle-box">
-        <div class="modal-detalle-header">
-            <h3 id="modal-detalle-titulo" style="margin: 0; color: var(--warning); border-bottom: none; padding-bottom: 0;">Detalle de Cierre</h3>
-            <button class="btn-close-modal" onclick="cerrarModalDetalle()">&times;</button>
-        </div>
-        <div id="modal-detalle-body" class="modal-detalle-body">
-            <!-- Se llena dinámicamente -->
+    <!-- MODAL DETALLE DE CIERRE -->
+    <div id="modal-detalle-overlay" style="display: none;">
+        <div id="modal-detalle-box">
+            <div class="modal-detalle-header">
+                <h3 id="modal-detalle-titulo"
+                    style="margin: 0; color: var(--warning); border-bottom: none; padding-bottom: 0;">Detalle de Cierre
+                </h3>
+                <button class="btn-close-modal" onclick="cerrarModalDetalle()">&times;</button>
+            </div>
+            <div id="modal-detalle-body" class="modal-detalle-body">
+                <!-- Se llena dinámicamente -->
+            </div>
         </div>
     </div>
-</div>
 
-<script src="admin.js"></script>
+    <script src="admin.js"></script>
 </body>
+
 </html>
