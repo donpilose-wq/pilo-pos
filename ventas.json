@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "id": "TCK-196264",
+    "total": 58000,
+    "metodo": "efectivo",
+    "pagaCon": 58000,
+    "vuelto": 0,
+    "fecha": "20/10/2026, 07:26:36",
+    "productos": [
+      {
+        "id": "prod0056",
+        "nombre": "Bondiola",
+        "precio": "58000",
+        "cantidad": 1,
+        "imagen": "img/bondiola.jpeg",
+        "subtotal": 58000
+      }
+    ]
+  }
+]
