@@ -166,5 +166,31 @@
         "subtotal": 9500
       }
     ]
+  },
+  {
+    "id": "TCK-070852",
+    "total": 24000,
+    "metodo": "efectivo",
+    "pagaCon": 50000,
+    "vuelto": 26000,
+    "fecha": "20/10/2026, 07:24:30",
+    "productos": [
+      {
+        "id": "prod0005",
+        "nombre": "1/4 dePollo con guarnición",
+        "precio": "16000",
+        "cantidad": 1,
+        "imagen": "img/ppolli.jpg",
+        "subtotal": 16000
+      },
+      {
+        "id": "prod0035",
+        "nombre": "Bomba de Papa",
+        "precio": "8000",
+        "cantidad": 1,
+        "imagen": "img/bombita.png",
+        "subtotal": 8000
+      }
+    ]
   }
 ]
