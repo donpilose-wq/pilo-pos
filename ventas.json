@@ -50,5 +50,23 @@
         "subtotal": 20000
       }
     ]
+  },
+  {
+    "id": "TCK-941643",
+    "total": 34000,
+    "metodo": "efectivo",
+    "pagaCon": 34000,
+    "vuelto": 0,
+    "fecha": "20/10/2026, 08:45:41",
+    "productos": [
+      {
+        "id": "prod0040",
+        "nombre": "Sándwich Milanesa con fritas",
+        "precio": "17000",
+        "cantidad": 2,
+        "imagen": "img/IMG_1098.jpeg",
+        "subtotal": 34000
+      }
+    ]
   }
 ]
