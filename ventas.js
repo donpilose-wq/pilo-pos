@@ -1,4 +1,4 @@
-// Registros de Ventas - Kiosco El Cholo
+// Registros de Ventas - punto de venta
 const DEFAULT_USERNAME = "donpilose-wq";
 const DEFAULT_REPO = "pilo-pos";
 
