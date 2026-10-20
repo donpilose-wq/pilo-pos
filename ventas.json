@@ -24,5 +24,23 @@
         "subtotal": 17000
       }
     ]
+  },
+  {
+    "id": "TCK-475468",
+    "total": 72000,
+    "metodo": "efectivo",
+    "pagaCon": 72000,
+    "vuelto": 0,
+    "fecha": "20/10/2026, 06:57:55",
+    "productos": [
+      {
+        "id": "prod0028",
+        "nombre": "Ensalada Rusa",
+        "precio": "8000",
+        "cantidad": 9,
+        "imagen": "img/larusi.png",
+        "subtotal": 72000
+      }
+    ]
   }
 ]
