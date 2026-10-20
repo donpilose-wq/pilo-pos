@@ -1,5 +1,5 @@
-// Gestión de Inventario - Kiosco El Cholo
-const DEFAULT_USERNAME = "donpilose-wq"; 
+// Gestión de Inventario - punto de venta
+const DEFAULT_USERNAME = "donpilose-wq";
 const DEFAULT_REPO = "menuclick";
 
 const RUTA_A_ARCHIVO = {
@@ -8,6 +8,30 @@ const RUTA_A_ARCHIVO = {
 
 let inventario = [];
 let editandoCodigo = null; // Guardar código del producto que se está editando
+
+const PLACEHOLDER_IMG = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='260' viewBox='0 0 400 260' fill='%231b2537'><rect width='400' height='260' fill='%23131a26'/><circle cx='200' cy='105' r='42' fill='%231b2537' stroke='%232e3c51' stroke-width='2'/><text x='50%' y='113' dominant-baseline='middle' text-anchor='middle' font-size='34'>🍽️</text><text x='50%' y='172' dominant-baseline='middle' text-anchor='middle' fill='%23f59e0b' font-family='sans-serif' font-weight='bold' font-size='16'>DON PILO</text><text x='50%' y='196' dominant-baseline='middle' text-anchor='middle' fill='%2364748b' font-family='sans-serif' font-size='12'>Rotiser%C3%ADa &amp; Pastas</text></svg>";
+
+function resolverRutaImagen(src) {
+    if (!src || src === 'img/.jpg') return PLACEHOLDER_IMG;
+    if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) return src;
+    let rel = src;
+    if (rel.startsWith('/')) rel = rel.slice(1);
+    return rel;
+}
+
+function handleImageFallback(imgEl, originalPath) {
+    imgEl.onerror = null;
+    let clean = (originalPath || '').replace(/^(\.\.\/|\.\/|img\/)/, '');
+    if (clean && !clean.startsWith('http') && clean !== '.jpg') {
+        imgEl.src = 'https://donpilose-wq.github.io/menuclick/img/' + encodeURIComponent(clean);
+        imgEl.onerror = function () {
+            this.onerror = null;
+            this.src = PLACEHOLDER_IMG;
+        };
+    } else {
+        imgEl.src = PLACEHOLDER_IMG;
+    }
+}
 
 function normalizarTexto(texto) {
     if (!texto) return '';
@@ -56,7 +80,7 @@ async function obtenerShaGitHub(filePath) {
     const username = localStorage.getItem('github_username') || DEFAULT_USERNAME;
     const repo = localStorage.getItem('github_repo') || DEFAULT_REPO;
     if (!token) return null;
-    
+
     try {
         const url = `https://api.github.com/repos/${username}/${repo}/contents/${filePath}`;
         const response = await fetchWithTimeout(url, {
@@ -84,11 +108,11 @@ async function leerDesdeGitHub(filePath) {
         const response = await fetchWithTimeout(url, {
             headers: { Authorization: `token ${token}` }
         });
-        
+
         if (response.status === 404) {
             return [];
         }
-        
+
         if (response.ok) {
             const data = await response.json();
             const decodedContent = decodeURIComponent(escape(atob(data.content)));
@@ -139,7 +163,7 @@ async function guardarEnGitHub(filePath, data, mensajeCommit) {
 
 async function apiGet(ruta, fallbackKey) {
     const fileName = RUTA_A_ARCHIVO[ruta];
-    
+
     const token = localStorage.getItem('github_token');
     if (navigator.onLine && token && fileName) {
         const dataGithub = await leerDesdeGitHub(fileName);
@@ -156,14 +180,14 @@ async function apiGet(ruta, fallbackKey) {
             localStorage.setItem(fallbackKey, JSON.stringify(data));
             return data;
         }
-    } catch (e) {}
+    } catch (e) { }
 
     return JSON.parse(localStorage.getItem(fallbackKey)) || [];
 }
 
 async function apiPost(ruta, data, fallbackKey) {
     localStorage.setItem(fallbackKey, JSON.stringify(data));
-    
+
     const fileName = RUTA_A_ARCHIVO[ruta];
     let githubOk = false;
 
@@ -185,7 +209,7 @@ function renderTablaProductos(lista) {
     if (lista.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="4" style="text-align: center; color: var(--text-secondary); font-style: italic;">
+                <td colspan="5" style="text-align: center; color: var(--text-secondary); font-style: italic;">
                     No se encontraron productos en el inventario.
                 </td>
             </tr>
@@ -198,12 +222,17 @@ function renderTablaProductos(lista) {
 
     lista.forEach((p) => {
         const tr = document.createElement('tr');
+        const imgSrc = resolverRutaImagen(p.imagen);
+        const precioNum = parseFloat(p.precio) || 0;
 
         tr.innerHTML = `
             <td><strong>${p.id}</strong></td>
+            <td>
+                <img class="inventario-thumb" src="${imgSrc}" onerror="handleImageFallback(this, '${p.imagen}')" alt="${p.nombre}">
+            </td>
             <td>${p.nombre}</td>
-            <td>$${p.precio.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
-            <td style="text-align: center; display: flex; gap: 8px; justify-content: center;">
+            <td>$${precioNum.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+            <td style="text-align: center; display: flex; gap: 8px; justify-content: center; align-items: center; height: 100%;">
                 <button class="btn btn-edit btn-icon-only" onclick="editarProducto('${p.id}')" title="Editar producto">✏️</button>
                 <button class="btn btn-danger btn-icon-only" onclick="eliminarProducto('${p.id}')" title="Eliminar producto">🗑️</button>
             </td>
@@ -214,14 +243,14 @@ function renderTablaProductos(lista) {
 
 function filtrarProductos() {
     const query = document.getElementById('search-box').value.trim();
-    
+
     if (!query) {
         renderTablaProductos(inventario);
         return;
     }
 
     const queryNorm = normalizarTexto(query);
-    const filtrados = inventario.filter(p => 
+    const filtrados = inventario.filter(p =>
         normalizarTexto(p.nombre).includes(queryNorm) ||
         normalizarTexto(p.id).includes(queryNorm)
     );
@@ -266,7 +295,7 @@ async function guardarProducto() {
 
     // Guardar base de datos
     await apiPost('/api/inventario', inventario, 'inventario');
-    
+
     cancelarEdicion();
     renderTablaProductos(inventario);
     filtrarProductos(); // Por si había algún filtro activo
@@ -293,7 +322,7 @@ function cancelarEdicion() {
     document.getElementById('admin-nombre').value = '';
     document.getElementById('admin-precio').value = '';
     document.getElementById('admin-tipo').value = 'fijo';
-    
+
     colapsarFormulario();
 }
 
