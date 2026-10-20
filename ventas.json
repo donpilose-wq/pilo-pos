@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "id": "TCK-796402",
+    "total": 25000,
+    "metodo": "efectivo",
+    "pagaCon": 50000,
+    "vuelto": 25000,
+    "fecha": "20/10/2026, 08:26:36",
+    "productos": [
+      {
+        "id": "prod0001",
+        "nombre": "Ravioles",
+        "precio": "17000",
+        "cantidad": 1,
+        "imagen": "img/IMG_1058.jpeg",
+        "subtotal": 17000
+      },
+      {
+        "id": "prod0022",
+        "nombre": "Budín de pan",
+        "precio": "8000",
+        "cantidad": 1,
+        "imagen": "img/flanp.jpg",
+        "subtotal": 8000
+      }
+    ]
+  }
+]
