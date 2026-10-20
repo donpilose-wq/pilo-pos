@@ -96,5 +96,23 @@
         "subtotal": 25000
       }
     ]
+  },
+  {
+    "id": "TCK-204911",
+    "total": 58000,
+    "metodo": "efectivo",
+    "pagaCon": 58000,
+    "vuelto": 0,
+    "fecha": "20/10/2026, 07:10:04",
+    "productos": [
+      {
+        "id": "prod0044",
+        "nombre": "Asado por kilo",
+        "precio": "58000",
+        "cantidad": 1,
+        "imagen": "img/Captura de pantalla 2025-10-29 165103.png",
+        "subtotal": 58000
+      }
+    ]
   }
 ]
