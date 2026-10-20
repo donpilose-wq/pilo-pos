@@ -505,5 +505,31 @@
         "productos": []
       }
     ]
+  },
+  {
+    "fecha": "20/10/2026, 19:27:18",
+    "efectivo": 58000,
+    "otros": 0,
+    "total": 58000,
+    "total_gastos": 0,
+    "cantidad_ventas": 1,
+    "ventas_del_dia": [
+      {
+        "fecha": "20/10/2026, 07:26:36",
+        "total": 58000,
+        "metodo": "efectivo",
+        "detalle": "Venta",
+        "productos": [
+          {
+            "id": "prod0056",
+            "nombre": "Bondiola",
+            "precio": "58000",
+            "cantidad": 1,
+            "imagen": "img/bondiola.jpeg",
+            "subtotal": 58000
+          }
+        ]
+      }
+    ]
   }
 ]
