@@ -1,4 +1,4 @@
-// Panel de Administración - Kiosco El Cholo
+// Panel de Administración -puntode venta
 const PIN_ADMIN = "123";
 
 // Control de acceso seguro
@@ -246,7 +246,7 @@ async function registrarGasto() {
     const mon = parseFloat(document.getElementById('gasto-monto').value);
 
     if (!det || isNaN(mon) || mon <= 0) {
-        const errorMsg = tipo === 'adelanto' 
+        const errorMsg = tipo === 'adelanto'
             ? "⚠️ Por favor, complete el nombre del empleado y el monto del adelanto."
             : "⚠️ Por favor, complete el detalle y el monto del pago correctamente.";
         alert(errorMsg);
@@ -406,6 +406,166 @@ async function borrarCierreHistorial(index) {
     }
 }
 
+// --- MOSTRAR DETALLE COMPLETO DE CIERRE ---
+function verDetalleCierre(index) {
+    const c = historialCierres[index];
+    if (!c) return;
+
+    document.getElementById('modal-detalle-titulo').innerText = `Detalle de Cierre - ${c.fecha}`;
+
+    const efectivo = c.efectivo || 0;
+    const otros = c.otros || 0;
+    const total = c.total || 0;
+    const totalGastos = c.total_gastos || 0;
+    const cantidadVentas = c.cantidad_ventas || 0;
+    const ventasDelDia = c.ventas_del_dia || [];
+
+    const egresos = ventasDelDia.filter(v => v.total < 0);
+    const ventasSolo = ventasDelDia.filter(v => v.total > 0);
+
+    let bodyHtml = `
+        <div class="grid-reporte" style="margin-top: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;">
+            <div class="caja-resumen" style="border-left-color: var(--success); padding: 12px; margin-bottom: 0;">
+                <p style="font-size: 0.75rem; margin: 0;">💵 Efectivo Neto</p>
+                <b style="font-size: 1.3rem;">$${efectivo.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</b>
+            </div>
+            <div class="caja-resumen" style="border-left-color: var(--accent-primary); padding: 12px; margin-bottom: 0;">
+                <p style="font-size: 0.75rem; margin: 0;">💳 Otros Medios</p>
+                <b style="font-size: 1.3rem;">$${otros.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</b>
+            </div>
+            <div class="caja-resumen" style="border-left-color: var(--danger); padding: 12px; margin-bottom: 0;">
+                <p style="font-size: 0.75rem; margin: 0;">➖ Egresos / Gastos</p>
+                <b style="font-size: 1.3rem; color: var(--danger);">-$${totalGastos.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</b>
+            </div>
+            <div class="caja-resumen" style="border-left-color: var(--warning); padding: 12px; margin-bottom: 0;">
+                <p style="font-size: 0.75rem; margin: 0;">💰 Total Caja</p>
+                <b style="font-size: 1.3rem; color: var(--warning);">$${total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</b>
+            </div>
+        </div>
+    `;
+
+    // Sección de Egresos
+    bodyHtml += `
+        <div style="margin-top: 15px;">
+            <h4 style="color: var(--danger); display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+                💸 EGRESOS, GASTOS Y VALES (${egresos.length})
+            </h4>
+            <div class="contenedor-tabla" style="margin-top: 0; max-height: 200px; overflow-y: auto;">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 8px 12px; font-size: 0.8rem;">Hora</th>
+                            <th style="padding: 8px 12px; font-size: 0.8rem;">Concepto</th>
+                            <th style="padding: 8px 12px; font-size: 0.8rem; text-align: right;">Monto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    `;
+
+    if (egresos.length > 0) {
+        egresos.forEach(eg => {
+            const time = eg.fecha.split(', ')[1] || eg.fecha;
+            const desc = eg.detalle.replace('GASTO: ', '').replace('ADELANTO SUELDO: ', 'Vale ');
+            bodyHtml += `
+                <tr>
+                    <td style="padding: 8px 12px; font-size: 0.85rem;">${time}</td>
+                    <td style="padding: 8px 12px; font-size: 0.85rem;">${desc}</td>
+                    <td style="padding: 8px 12px; font-size: 0.85rem; color: var(--danger); font-weight: bold; text-align: right;">-$${Math.abs(eg.total).toLocaleString('es-AR')}</td>
+                </tr>
+            `;
+        });
+    } else {
+        bodyHtml += `
+            <tr>
+                <td colspan="3" style="text-align: center; color: var(--text-secondary); padding: 12px; font-size: 0.85rem;">No se registraron egresos en este turno.</td>
+            </tr>
+        `;
+    }
+
+    bodyHtml += `
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    // Sección de Ventas
+    bodyHtml += `
+        <div style="margin-top: 15px;">
+            <h4 style="color: var(--success); display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 6px;">
+                🛒 VENTAS E INGRESOS (${ventasSolo.length})
+            </h4>
+            <div class="contenedor-tabla" style="margin-top: 0; max-height: 250px; overflow-y: auto;">
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="padding: 8px 12px; font-size: 0.8rem;">Hora</th>
+                            <th style="padding: 8px 12px; font-size: 0.8rem;">Medio</th>
+                            <th style="padding: 8px 12px; font-size: 0.8rem;">Productos / Detalle</th>
+                            <th style="padding: 8px 12px; font-size: 0.8rem; text-align: right;">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+    `;
+
+    if (ventasSolo.length > 0) {
+        ventasSolo.forEach(v => {
+            const time = v.fecha.split(', ')[1] || v.fecha;
+            let prodText = "";
+            if (v.productos && v.productos.length > 0) {
+                prodText = v.productos.map(p => `${p.nombre} (x${p.cant})`).join(', ');
+            } else {
+                prodText = v.detalle || 'Venta general';
+            }
+
+            let medioText = "";
+            if (v.metodo === 'efectivo') medioText = '💵 Efectivo';
+            else if (v.metodo === 'debito') medioText = '💳 Tarjeta';
+            else medioText = '📱 QR';
+
+            bodyHtml += `
+                <tr>
+                    <td style="padding: 8px 12px; font-size: 0.85rem;">${time}</td>
+                    <td style="padding: 8px 12px; font-size: 0.85rem;">${medioText}</td>
+                    <td style="padding: 8px 12px; font-size: 0.85rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${prodText}">${prodText}</td>
+                    <td style="padding: 8px 12px; font-size: 0.85rem; color: var(--success); font-weight: bold; text-align: right;">$${v.total.toLocaleString('es-AR')}</td>
+                </tr>
+            `;
+        });
+    } else {
+        bodyHtml += `
+            <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 12px; font-size: 0.85rem;">No se registraron ventas en este turno.</td>
+            </tr>
+        `;
+    }
+
+    bodyHtml += `
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('modal-detalle-body').innerHTML = bodyHtml;
+    document.getElementById('modal-detalle-overlay').style.display = 'flex';
+}
+
+function cerrarModalDetalle() {
+    document.getElementById('modal-detalle-overlay').style.display = 'none';
+}
+
+// Configurar cierre del modal con clic fuera u Escape
+const modalOverlay = document.getElementById('modal-detalle-overlay');
+if (modalOverlay) {
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) cerrarModalDetalle();
+    });
+}
+window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') cerrarModalDetalle();
+});
+
 async function anularUltimaVentaAdmin() {
     if (ventas.length === 0) return alert("No hay movimientos para anular.");
 
@@ -444,14 +604,37 @@ function actualizarTodo() {
         tbodyHist.innerHTML = '';
         [...historialCierres].reverse().forEach((c, index) => {
             const realIndex = historialCierres.length - 1 - index;
+
+            // Obtener gastos/egresos de este cierre
+            const egresos = (c.ventas_del_dia || []).filter(v => v.total < 0);
+            const totalGastos = c.total_gastos || 0;
+
+            let egresosCol = "";
+            if (totalGastos > 0) {
+                let egresosLista = egresos.map(eg => {
+                    const desc = eg.detalle.replace('GASTO: ', '').replace('ADELANTO SUELDO: ', 'Vale ');
+                    return `<div style="font-size: 0.8rem; color: var(--danger); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 250px;" title="${desc}: $${Math.abs(eg.total).toLocaleString('es-AR')}">• ${desc} (-$${Math.abs(eg.total).toLocaleString('es-AR')})</div>`;
+                }).join('');
+                egresosCol = `
+                    <div style="font-weight: 600; color: var(--danger);">-$${totalGastos.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</div>
+                    <div style="max-height: 80px; overflow-y: auto; padding-right: 4px;">${egresosLista}</div>
+                `;
+            } else {
+                egresosCol = `<span style="color: var(--text-secondary); font-size: 0.85rem;">-</span>`;
+            }
+
             tbodyHist.innerHTML += `
                 <tr>
                     <td>${c.fecha}</td>
                     <td>$${c.efectivo.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
                     <td>$${c.otros.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
+                    <td>${egresosCol}</td>
                     <td style="font-weight: 700; color: var(--success);">$${c.total.toLocaleString('es-AR', { minimumFractionDigits: 2 })}</td>
                     <td>
-                        <button class="btn btn-danger btn-icon-only" onclick="borrarCierreHistorial(${realIndex})" title="Borrar del historial">🗑️</button>
+                        <div style="display: flex; gap: 6px;">
+                            <button class="btn btn-secondary btn-icon-only" onclick="verDetalleCierre(${realIndex})" title="Ver detalles del cierre">👁️</button>
+                            <button class="btn btn-danger btn-icon-only" onclick="borrarCierreHistorial(${realIndex})" title="Borrar del historial">🗑️</button>
+                        </div>
                     </td>
                 </tr>`;
         });
