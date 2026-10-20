@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pos venta El Cholo - POS Profesional</title>
+    <title>pos venta  - POS Profesional</title>
     <!-- Google Fonts: Outfit for titles, Inter for body -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -810,8 +810,15 @@
         }
 
         @keyframes fadeInModal {
-            from { opacity: 0; transform: scale(0.96); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         #modal-ticket-box {
@@ -1038,6 +1045,7 @@
             body * {
                 visibility: hidden !important;
             }
+
             body {
                 background: #ffffff !important;
                 color: #000000 !important;
@@ -1045,6 +1053,7 @@
                 padding: 0 !important;
                 overflow: visible !important;
             }
+
             #modal-ticket-overlay,
             #modal-ticket-box,
             .ticket-paper-container,
@@ -1052,6 +1061,7 @@
             #ticket-paper * {
                 visibility: visible !important;
             }
+
             #modal-ticket-overlay {
                 position: absolute !important;
                 left: 0 !important;
@@ -1064,6 +1074,7 @@
                 margin: 0 !important;
                 display: block !important;
             }
+
             #modal-ticket-box {
                 position: static !important;
                 width: 100% !important;
@@ -1074,14 +1085,17 @@
                 border: none !important;
                 box-shadow: none !important;
             }
+
             .no-print {
                 display: none !important;
             }
+
             .ticket-paper-container {
                 padding: 0 !important;
                 margin: 0 !important;
                 display: block !important;
             }
+
             #ticket-paper {
                 width: 100% !important;
                 max-width: 76mm !important;
@@ -1096,6 +1110,7 @@
                 border: none !important;
                 border-radius: 0 !important;
             }
+
             @page {
                 margin: 0;
                 size: auto;
@@ -1117,7 +1132,7 @@
                 </svg>
             </div>
             <div class="header-text">
-                <h1>PUNTO DE VENTA</h1>
+                <h1>Punto de Venta</h1>
                 <p>Sistema de Gestión de Ventas & POS</p>
             </div>
         </div>
@@ -1208,7 +1223,8 @@
                     ANOTAR EN FIADOS
                 </button>
 
-                <button class="btn btn-ver-ticket" onclick="reimprimirUltimoTicket()" title="Ver y reimprimir el ticket de la última venta">
+                <button class="btn btn-ver-ticket" onclick="reimprimirUltimoTicket()"
+                    title="Ver y reimprimir el ticket de la última venta">
                     🧾 Reimprimir Último Ticket
                 </button>
 
@@ -1264,17 +1280,18 @@
                 <h3>🧾 Comprobante de Venta POS</h3>
                 <button class="btn-close-modal" onclick="cerrarModalTicket()" title="Cerrar (Esc)">✕</button>
             </div>
-            
+
             <div class="ticket-paper-container">
                 <div id="ticket-paper" class="ticket-paper"></div>
             </div>
 
             <div id="modal-ticket-actions" class="modal-actions no-print">
                 <button class="btn btn-print-ticket" onclick="imprimirTicketActual()">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="6 9 6 2 18 2 18 9"/>
-                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                        <rect width="12" height="8" x="6" y="14"/>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 6 2 18 2 18 9" />
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                        <rect width="12" height="8" x="6" y="14" />
                     </svg>
                     IMPRIMIR TICKET
                 </button>
@@ -1341,10 +1358,15 @@
         }
 
         // Funciones del Catálogo Modal
-        function abrirModalCatalogo() {
+        async function abrirModalCatalogo() {
             document.getElementById('modal-catalogo').style.display = 'flex';
             document.getElementById('filtro-catalogo').value = '';
             catalogoCategoriaActiva = 'TODOS';
+
+            if (!productosDB || productosDB.length === 0) {
+                await cargarInventario();
+            }
+
             renderizarCategoriasCatalogo();
             renderizarCatalogo();
             setTimeout(() => {
@@ -1370,7 +1392,8 @@
             const productosFiltrados = productosDB.filter(p => {
                 const matchTexto = (p.nombre && p.nombre.toUpperCase().includes(filtro)) ||
                     (p.id && p.id.toUpperCase().includes(filtro));
-                const matchCat = (catalogoCategoriaActiva === 'TODOS') || (p.categoria === catalogoCategoriaActiva);
+                const catProd = (p.categoria || '').trim();
+                const matchCat = (catalogoCategoriaActiva === 'TODOS') || (catProd === catalogoCategoriaActiva.trim());
                 return matchTexto && matchCat;
             });
 
