@@ -92,5 +92,11 @@
         "subtotal": 16000
       }
     ]
+  },
+  {
+    "total": -5000,
+    "metodo": "efectivo",
+    "fecha": "20/10/2026, 20:58:47",
+    "detalle": "GASTO: pagar luz"
   }
 ]
