@@ -682,8 +682,8 @@ function mostrarModalTicket(venta) {
 
     ticketEl.innerHTML = `
         <div class="ticket-header">
-            <div class="ticket-brand">KIOSCO EL CHOLO</div>
-            <div class="ticket-subtitle">COMPROBANTE DE VENTA POS</div>
+            <div class="ticket-brand">DON PILO</div>
+            <div class="ticket-subtitle">ROTISERÍA & PASTAS — POS</div>
             <div class="ticket-meta">
                 <span>Nro: ${nroTicket}</span><br>
                 <span>Fecha: ${venta.fecha || new Date().toLocaleString('es-AR')}</span>
