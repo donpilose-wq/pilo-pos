@@ -505,5 +505,109 @@
         "productos": []
       }
     ]
+  },
+  {
+    "fecha": "20/10/2026, 20:59:32",
+    "efectivo": 89000,
+    "otros": 16000,
+    "total": 105000,
+    "total_gastos": 6000,
+    "cantidad_ventas": 4,
+    "ventas_del_dia": [
+      {
+        "fecha": "20/10/2026, 08:26:36",
+        "total": 25000,
+        "metodo": "efectivo",
+        "detalle": "Venta",
+        "productos": [
+          {
+            "id": "prod0001",
+            "nombre": "Ravioles",
+            "precio": "17000",
+            "cantidad": 1,
+            "imagen": "img/IMG_1058.jpeg",
+            "subtotal": 17000
+          },
+          {
+            "id": "prod0022",
+            "nombre": "Budín de pan",
+            "precio": "8000",
+            "cantidad": 1,
+            "imagen": "img/flanp.jpg",
+            "subtotal": 8000
+          }
+        ]
+      },
+      {
+        "fecha": "20/10/2026, 08:45:26",
+        "total": 36000,
+        "metodo": "efectivo",
+        "detalle": "Venta",
+        "productos": [
+          {
+            "id": "prod0005",
+            "nombre": "1/4 dePollo con guarnición",
+            "precio": "16000",
+            "cantidad": 1,
+            "imagen": "img/ppolli.jpg",
+            "subtotal": 16000
+          },
+          {
+            "id": "prod0006",
+            "nombre": "Asado con guarnición",
+            "precio": "20000",
+            "cantidad": 1,
+            "imagen": "img/asadocg.jpg",
+            "subtotal": 20000
+          }
+        ]
+      },
+      {
+        "fecha": "20/10/2026, 08:45:41",
+        "total": 34000,
+        "metodo": "efectivo",
+        "detalle": "Venta",
+        "productos": [
+          {
+            "id": "prod0040",
+            "nombre": "Sándwich Milanesa con fritas",
+            "precio": "17000",
+            "cantidad": 2,
+            "imagen": "img/IMG_1098.jpeg",
+            "subtotal": 34000
+          }
+        ]
+      },
+      {
+        "fecha": "20/10/2026, 20:50:06",
+        "total": -1000,
+        "metodo": "efectivo",
+        "detalle": "GASTO: coca",
+        "productos": []
+      },
+      {
+        "fecha": "20/10/2026, 08:58:15",
+        "total": 16000,
+        "metodo": "qr",
+        "detalle": "Venta",
+        "productos": [
+          {
+            "id": "prod0035",
+            "nombre": "Bomba de Papa",
+            "precio": "8000",
+            "cantidad": 2,
+            "imagen": "img/bombita.png",
+            "subtotal": 16000
+          }
+        ]
+      },
+      {
+        "fecha": "20/10/2026, 20:58:47",
+        "total": -5000,
+        "metodo": "efectivo",
+        "detalle": "GASTO: pagar luz",
+        "productos": []
+      }
+    ]
   }
 ]
