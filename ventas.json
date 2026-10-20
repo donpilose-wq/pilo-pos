@@ -68,5 +68,11 @@
         "subtotal": 34000
       }
     ]
+  },
+  {
+    "total": -1000,
+    "metodo": "efectivo",
+    "fecha": "20/10/2026, 20:50:06",
+    "detalle": "GASTO: coca"
   }
 ]
